@@ -8,21 +8,22 @@ import org.hibernate.annotations.ColumnDefault;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "USER_ROLES")
 public class UserRole {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false)
     private Integer id;
 
     @Size(max = 255)
-    @NotNull
     @Column(name = "NAME", nullable = false)
     private String name;
 
     @Size(max = 255)
-    @Column(name = "DESCRIPTION")
+    @Column(name = "DESCRIPTION", nullable = true)
     private String description;
 
     @NotNull

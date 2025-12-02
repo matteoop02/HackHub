@@ -1,8 +1,6 @@
 package unicam.ids.HackHub.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import unicam.ids.HackHub.enums.SubmissionState;
 import java.util.Date;
@@ -10,36 +8,41 @@ import java.util.Date;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "SUBMISSIONS")
 public class Submission {
+
+    public Submission (String title, String content, Date sendingDate) {
+        this.title = title;
+        this.content = content;
+        this.sendingDate = sendingDate;
+        this.state = SubmissionState.INVIATA;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false)
     private Long id;
 
-    @Column(name = "TITOLO", nullable = false)
-    private String titolo;
+    @Column(name = "TITLE", nullable = false)
+    private String title;
 
-    @Column(name = "CONTENUTO", columnDefinition = "TEXT")
-    private String contenuto;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "DATA_INVIO", nullable = false)
-    private Date dataInvio;
+    @Column(name = "CONTENT", columnDefinition = "TEXT")
+    private String content;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "ULTIMA_MODIFICA")
-    private Date ultimaModifica;
+    @Column(name = "SENDING_DATE", nullable = false)
+    private Date sendingDate;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "LAST_EDIT")
+    private Date lastEdit;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "STATO", nullable = false)
-    private SubmissionState stato;
+    @Column(name = "STATE", nullable = false)
+    private SubmissionState state;
 
-    // Relazione OneToOne con Team
-    @OneToOne
+    @OneToOne(mappedBy = "submission", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "TEAM_ID", nullable = false)
     private Team team;
 }

@@ -1,18 +1,26 @@
 package unicam.ids.HackHub.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "TEAMS")
 public class Team {
+
+    public Team(String name, User creator, Hackathon hackathon) {
+        this.name = name;
+        this.members = new ArrayList<User>();
+        this.members.add(creator);
+        this.mentors = new ArrayList<User>();
+        this.submission = null;
+        this.hackathon = hackathon;
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,25 +30,18 @@ public class Team {
     @Column(name = "NAME", nullable = false, unique = true)
     private String name;
 
-    // Membri del team
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "MEMBERS",
-            joinColumns = @JoinColumn(name = "TEAM_ID"),
-            inverseJoinColumns = @JoinColumn(name = "USER_ID")
-    )
+    @OneToMany(mappedBy = "team")
     private List<User> members;
 
-    // Mentori assegnati al team
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "MENTORS",
-            joinColumns = @JoinColumn(name = "TEAM_ID"),
-            inverseJoinColumns = @JoinColumn(name = "USER_ID")
+    @ManyToMany
+    @JoinTable(name = "MENTORI", joinColumns = @JoinColumn(name = "TEAM_ID"), inverseJoinColumns = @JoinColumn(name = "USER_ID")
     )
     private List<User> mentors;
 
-    // Sottomissione associata al team (uno a uno)
     @OneToOne(mappedBy = "team", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Submission submission;
+
+    @ManyToOne
+    @JoinColumn(name = "HACKATHON_ID")
+    private Hackathon hackathon;
 }

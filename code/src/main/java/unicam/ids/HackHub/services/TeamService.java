@@ -2,10 +2,11 @@ package unicam.ids.HackHub.services;
 
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import unicam.ids.HackHub.model.Hackathon;
 import unicam.ids.HackHub.model.Team;
 import unicam.ids.HackHub.model.User;
+import unicam.ids.HackHub.model.UserRole;
 import unicam.ids.HackHub.repository.TeamRepository;
-import java.util.List;
 
 @Service
 public class TeamService {
@@ -14,25 +15,24 @@ public class TeamService {
     private TeamRepository teamRepository;
 
     // Crea un nuovo team
-    public Team createTeam(User creator, String name, List<User> members) {
-        // Controllo ruolo
+    public Team createTeam(String name, User creator, Hackathon hackathon) {
+
         String roleName = creator.getRole().getName();
         if (roleName.equals("MENTORE") || roleName.equals("GIUDICE") || roleName.equals("ORGANIZZATORE")) {
             throw new IllegalArgumentException("Utente dello staff non può creare un team");
         }
 
-        // Controllo se già in un team
-        boolean isAlreadyInTeam = teamRepository.existsByMembersContains(creator);
+        boolean isAlreadyInTeam = teamRepository.existsByMembersContains(creator, hackathon);
         if (isAlreadyInTeam) {
             throw new IllegalArgumentException("Utente già membro di un team");
         }
 
-        // Crea team e aggiungi il creatore come primo membro
-        Team team = new Team();
-        team.setName(name);
-        members.add(creator);
-        team.setMembers(members);
+        boolean isNameUsed = teamRepository.existByName(name, hackathon);
+        if(isNameUsed) {
+            throw new IllegalArgumentException("Nome team già in uso");
+        }
 
+        Team team = new Team(name, creator, hackathon);
         return teamRepository.save(team);
     }
 }
