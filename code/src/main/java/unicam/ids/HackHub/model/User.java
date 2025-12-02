@@ -8,10 +8,7 @@ import java.util.Date;
 
 @Getter
 @Setter
-//Genera un costruttore vuoto per JPA
 @NoArgsConstructor
-//Genera un costruttore con tutti gli args
-// NB:Prentende anche ID ma verrà inserito sempre NULL perchè gestito da DB
 @AllArgsConstructor
 @Entity
 @Table(name = "USERS")
@@ -51,9 +48,11 @@ public class User {
     @Column(name = "DATE_OF_BIRTH")
     private Date dateOfBirth;
 
-    // --- RELAZIONE CON USER ROLE ---
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "ROLE_ID", nullable = false)
     private UserRole role;
 
+    @ManyToOne
+    @JoinColumn(name = "TEAM_ID", nullable = true)
+    private Team team;
 }
