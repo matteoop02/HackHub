@@ -43,3 +43,4 @@ bin/
 
 ### .Vpp.Bak ###
 *.vpp.bak_*
+*.vpp.lck*

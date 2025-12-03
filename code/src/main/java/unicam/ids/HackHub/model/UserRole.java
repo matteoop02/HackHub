@@ -19,6 +19,10 @@ public class UserRole {
     private Integer id;
 
     @Size(max = 255)
+    @Column(name = "CATEGORY", nullable = false)
+    private String category;
+
+    @Size(max = 255)
     @Column(name = "NAME", nullable = false)
     private String name;
 

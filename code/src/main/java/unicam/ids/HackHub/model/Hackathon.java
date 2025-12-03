@@ -1,35 +1,21 @@
 package unicam.ids.HackHub.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import unicam.ids.HackHub.enums.HackathonState;
-
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
-@Table(name = "Hackathons")
+@Table(name = "HACKATHONS")
 public class Hackathon {
-
-    public Hackathon(String name, String place, String regulation, Date subscriptionDeadline, Date startDate, Date endDate, double prize, int maxTeamSize) {
-        this.name = name;
-        this.place = place;
-        this.regulation = regulation;
-        this.subscriptionDeadline = subscriptionDeadline;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.prize = prize;
-        this.maxTeamSize = maxTeamSize;
-        this.teams = new ArrayList<Team>();
-        this.winner = null;
-        this.state = HackathonState.IN_ISCRIZIONE;
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -57,8 +43,8 @@ public class Hackathon {
     @Column(name = "END_DATE", nullable = false)
     private Date endDate;
 
-    @Column(name = "PRIZE", nullable = false)
-    private double prize;
+    @Column(name = "REWARD", nullable = false)
+    private double reward;
 
     @OneToMany(mappedBy = "hackathon", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Team> teams;
@@ -67,9 +53,11 @@ public class Hackathon {
     private int maxTeamSize;
 
     @OneToOne
-    @JoinColumn(name = "WINNER_ID")
+    @JoinColumn(name = "WINNER_ID", referencedColumnName = "ID")
     private Team winner;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "STATE", nullable = false)
     private HackathonState state;
 }
+
