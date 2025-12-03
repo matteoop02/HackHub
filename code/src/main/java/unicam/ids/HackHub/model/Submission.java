@@ -12,12 +12,12 @@ import java.util.Date;
 @Table(name = "SUBMISSIONS")
 public class Submission {
 
-    public Submission (String title, String content, Date sendingDate) {
-        this.title = title;
-        this.content = content;
-        this.sendingDate = sendingDate;
-        this.state = SubmissionState.INVIATA;
-    }
+//    public Submission (String title, String content, Date sendingDate) {
+//        this.title = title;
+//        this.content = content;
+//        this.sendingDate = sendingDate;
+//        this.state = SubmissionState.INVIATA;
+//    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
