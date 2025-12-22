@@ -12,38 +12,34 @@ import java.util.Date;
 @Table(name = "SUBMISSIONS")
 public class Submission {
 
-//    public Submission (String title, String content, Date sendingDate) {
-//        this.title = title;
-//        this.content = content;
-//        this.sendingDate = sendingDate;
-//        this.state = SubmissionState.INVIATA;
-//    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID", nullable = false)
+    @Column(name = "Id", nullable = false)
     private Long id;
 
-    @Column(name = "TITLE", nullable = false)
+    @Column(name = "Title", nullable = false)
     private String title;
 
-    @Column(name = "CONTENT", columnDefinition = "TEXT")
+    @Column(name = "Content", columnDefinition = "TEXT")
     private String content;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "SENDING_DATE", nullable = false)
+    @Column(name = "SendingDate", nullable = false)
     private Date sendingDate;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "LAST_EDIT")
+    @Column(name = "LastEdit")
     private Date lastEdit;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "STATE", nullable = false)
+    @Column(name = "State", nullable = false)
     private SubmissionState state;
 
-    @OneToOne(mappedBy = "submission", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "TEAM_ID", nullable = false)
+    @OneToOne
+    @JoinColumn(name = "TeamID")
     private Team team;
-}
 
+    @ManyToOne
+    @JoinColumn(name = "HackathonID")
+    private Hackathon hackathon;
+}

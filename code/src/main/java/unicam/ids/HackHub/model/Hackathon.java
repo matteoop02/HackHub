@@ -19,45 +19,44 @@ public class Hackathon {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID", nullable = false)
+    @Column(name = "Id", nullable = false)
     private Long id;
 
-    @Column(name = "NAME", nullable = false)
+    @Column(name = "Name", nullable = false)
     private String name;
 
-    @Column(name = "PLACE", nullable = false)
+    @Column(name = "Place", nullable = false)
     private String place;
 
-    @Column(name = "REGULATION", nullable = false)
+    @Column(name = "Regulation", nullable = false)
     private String regulation;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "SUBSCRIPTION_DEADLINE", nullable = false)
+    @Column(name = "SubscriptionDeadline", nullable = false)
     private Date subscriptionDeadline;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "START_DATE", nullable = false)
+    @Column(name = "StartDate", nullable = false)
     private Date startDate;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "END_DATE", nullable = false)
+    @Column(name = "EndDate", nullable = false)
     private Date endDate;
 
-    @Column(name = "REWARD", nullable = false)
+    @Column(name = "Reward", nullable = false)
     private double reward;
 
-    @OneToMany(mappedBy = "hackathon", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "hackathon")
     private List<Team> teams;
 
-    @Column(name = "MAX_TEAM_SIZE", nullable = false)
+    @Column(name = "MaxTeamSize", nullable = false)
     private int maxTeamSize;
 
     @OneToOne
-    @JoinColumn(name = "WINNER_ID", referencedColumnName = "ID")
+    @JoinColumn(name = "WinnerId", referencedColumnName = "Id")
     private Team winner;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "STATE", nullable = false)
+    @Column(name = "State", nullable = false)
     private HackathonState state;
 }
-

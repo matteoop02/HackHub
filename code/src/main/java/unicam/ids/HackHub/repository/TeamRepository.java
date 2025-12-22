@@ -6,10 +6,6 @@ import unicam.ids.HackHub.model.Team;
 import unicam.ids.HackHub.model.User;
 
 public interface TeamRepository extends JpaRepository<Team, Long> {
-
-    // Controlla se un utente è già in un team
-    boolean existsByMembersContains(User user, Hackathon hackathon);
-
-    //Verifica un team appartenente ad un determinato hackathon ha un determinato nome
-    boolean existByName(String name, Hackathon hackathon);
+    boolean existsByMembersContainsAndHackathon(User user, Hackathon hackathon);
+    boolean existsByNameAndHackathon(String name, Hackathon hackathon);
 }

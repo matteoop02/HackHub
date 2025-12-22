@@ -21,11 +21,11 @@ public class TeamService {
         if (roleCategory.equals("STAFF"))
             throw new IllegalArgumentException("Membro dello staff non può creare un team");
 
-        boolean isAlreadyInTeam = teamRepository.existsByMembersContains(creator, hackathon);
+        boolean isAlreadyInTeam = teamRepository.existsByMembersContainsAndHackathon(creator, hackathon);
         if (isAlreadyInTeam)
             throw new IllegalArgumentException("Utente già membro di un team");
 
-        boolean isNameUsed = teamRepository.existByName(name, hackathon);
+        boolean isNameUsed = teamRepository.existsByNameAndHackathon(name, hackathon);
         if(isNameUsed)
             throw new IllegalArgumentException("Nome team già in uso");
 
