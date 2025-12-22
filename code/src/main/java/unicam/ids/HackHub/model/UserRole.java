@@ -15,23 +15,23 @@ public class UserRole {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID", nullable = false)
+    @Column(name = "Id", nullable = false)
     private Integer id;
 
     @Size(max = 255)
-    @Column(name = "CATEGORY", nullable = false)
+    @Column(name = "Category", nullable = false)
     private String category;
 
     @Size(max = 255)
-    @Column(name = "NAME", nullable = false)
+    @Column(name = "Name", nullable = false)
     private String name;
 
     @Size(max = 255)
-    @Column(name = "DESCRIPTION", nullable = true)
+    @Column(name = "Description", nullable = true)
     private String description;
 
     @NotNull
     @ColumnDefault("TRUE")
-    @Column(name = "IS_ACTIVE", nullable = false)
+    @Column(name = "IsActive", nullable = false)
     private Boolean isActive = true;
 }

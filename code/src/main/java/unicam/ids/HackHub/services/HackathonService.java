@@ -59,7 +59,7 @@ public class HackathonService {
         if (!subscriptionDeadline.before(startDate))
             throw new IllegalArgumentException("La data di scadenza iscrizione non è antecedente alla data inizio");
 
-        if (hackathonRepository.existByName(name))
+        if (hackathonRepository.existsByName(name))
             throw new IllegalArgumentException("Esiste già un hackathon con lo stesso nome");
     }
 }

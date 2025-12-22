@@ -13,7 +13,7 @@ repositories {
 }
 
 application {
-    mainClass = 'unicam/ids/HackHub/Main.java'
+    mainClass = 'unicam/ids/HackHub/Main'
 }
 
 dependencies {
@@ -33,9 +33,6 @@ dependencies {
 
     // H2 database
     implementation 'com.h2database:h2:2.3.232'
-
-    // Swagger/OpenAPI via Springdoc
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.12'
 
     // Devtools per auto-reload
     developmentOnly 'org.springframework.boot:spring-boot-devtools'

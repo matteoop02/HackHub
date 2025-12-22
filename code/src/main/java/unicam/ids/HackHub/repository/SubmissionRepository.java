@@ -7,7 +7,6 @@ import unicam.ids.HackHub.model.Submission;
 
 import java.util.List;
 
-public interface SubmissionRepository {
+public interface SubmissionRepository extends JpaRepository<Submission, Long> {
     public List<Submission> findByHackathonId(Long hackathonId);
-
 }
