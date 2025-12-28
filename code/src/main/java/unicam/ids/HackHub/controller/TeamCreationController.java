@@ -1,8 +1,0 @@
-package unicam.ids.HackHub.controller;
-
-import org.springframework.web.bind.annotation.RestController;
-
-@RestController
-public class TeamCreationController {
-
-}

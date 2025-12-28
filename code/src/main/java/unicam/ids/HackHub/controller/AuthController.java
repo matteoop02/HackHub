@@ -15,7 +15,6 @@ import java.util.Date;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-
     @Autowired
     private UserService userService;
 

@@ -3,10 +3,14 @@ package unicam.ids.HackHub.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import unicam.ids.HackHub.dto.HackathonDTO;
+import unicam.ids.HackHub.enums.HackathonState;
 import unicam.ids.HackHub.model.Hackathon;
 import unicam.ids.HackHub.model.Submission;
 import unicam.ids.HackHub.model.User;
 import unicam.ids.HackHub.repository.HackathonRepository;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -19,6 +23,26 @@ public class HackathonService {
     @Transactional(readOnly = true)
     public List<Hackathon> getAllHackathons() {
         return hackathonRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public List<HackathonDTO> getAllHackathonsAsDTO() {
+        return hackathonRepository.findAll().stream()
+                .map(h -> new HackathonDTO(
+                        h.getId(),
+                        h.getName(),
+                        h.getPlace(),
+                        h.getRegulation(),
+                        h.getSubscriptionDeadline(),
+                        h.getStartDate(),
+                        h.getEndDate(),
+                        h.getReward(),
+                        h.getTeams(),
+                        h.getMaxTeamSize(),
+                        h.getWinner() != null ? h.getWinner().getId() : null,
+                        h.getState()
+                ))
+                .toList();
     }
 
     @Transactional
@@ -61,6 +85,27 @@ public class HackathonService {
 
         if (hackathonRepository.existsByName(name))
             throw new IllegalArgumentException("Esiste già un hackathon con lo stesso nome");
+    }
+
+    @Transactional(readOnly = true)
+    public List<HackathonDTO> getPublicHackathons() {
+        List<Hackathon> allHackathons = hackathonRepository.findAll();
+        return allHackathons.stream()
+                .map(h -> new HackathonDTO(
+                        h.getId(),
+                        h.getName(),
+                        h.getPlace(),
+                        null,
+                        h.getSubscriptionDeadline(),
+                        h.getStartDate(),
+                        h.getEndDate(),
+                        h.getReward(),
+                        null,
+                        h.getMaxTeamSize(),
+                        null,
+                        h.getState()
+                ))
+                .toList();
     }
 }
 
