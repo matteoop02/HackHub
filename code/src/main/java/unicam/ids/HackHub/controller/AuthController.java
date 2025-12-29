@@ -22,7 +22,7 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody UserDTO userDTO) {
         User user = userService.login(userDTO);
         if(user != null) {
-            return ResponseEntity.ok(user);
+            return ResponseEntity.ok("Login effettuato");
         } else {
             return ResponseEntity.status(401).body("Username o Password errati");
         }

@@ -46,4 +46,12 @@ public class UserService {
         user.setRole(role);
         userRepository.save(user);
     }
+
+    public boolean isStaff(User user) {
+        if (user.getRole().getCategory().toString().equalsIgnoreCase("membro dello staff")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
