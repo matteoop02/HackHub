@@ -6,8 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import unicam.ids.HackHub.dto.TeamDTO;
-import unicam.ids.HackHub.dto.UserDTO;
+import unicam.ids.HackHub.dto.ComplexDTO.UserTeamDTO;
 import unicam.ids.HackHub.model.Hackathon;
 import unicam.ids.HackHub.model.Team;
 import unicam.ids.HackHub.model.User;
@@ -29,19 +28,19 @@ public class TeamController {
     private HackathonRepository hackathonRepository;
 
     @PostMapping("/create")
-    public ResponseEntity<?> createTeam(@RequestBody TeamDTO teamDTO, UserDTO userDTO) {
+    public ResponseEntity<?> createTeam(@RequestBody UserTeamDTO userTeamDTO) {
         try {
-            Optional<User> creator = userRepository.findByEmail(userDTO.getEmail());
+            Optional<User> creator = userRepository.findByEmail(userTeamDTO.getUserDTO().getEmail());
             if(creator.isEmpty()) {
                 throw new IllegalArgumentException("Utente non trovato");
             }
-            Optional<Hackathon> hackathon = hackathonRepository.findById(teamDTO.getHackathonId());
+            Optional<Hackathon> hackathon = hackathonRepository.findById(userTeamDTO.getTeamDTO().getHackathonId());
             if(hackathon.isEmpty()) {
                 throw new IllegalArgumentException("Hakcathon non trovato");
             }
-            List<User> members = userRepository.findAllById(teamDTO.getMembersIds());
-            Team team = teamService.createTeam(creator.get(), teamDTO.getName(), hackathon.get(), members);
-            return ResponseEntity.ok(team);
+            List<User> members = userRepository.findAllById(userTeamDTO.getTeamDTO().getMembersIds());
+            Team team = teamService.createTeam(creator.get(), userTeamDTO.getTeamDTO().getName(), hackathon.get(), members);
+            return ResponseEntity.ok("Team creato");
         }
         catch(Exception ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());
