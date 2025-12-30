@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import unicam.ids.HackHub.dto.ComplexDTO.HackathonSubmissionsEvaluationDTO;
 import unicam.ids.HackHub.dto.ComplexDTO.UserHackathonDTO;
 import unicam.ids.HackHub.dto.ComplexDTO.UserTeamDTO;
 import unicam.ids.HackHub.dto.HackathonDTO;
@@ -69,13 +70,24 @@ public class SubmissionController {
     }
 
     @PostMapping("/update")
-    public ResponseEntity<?> updateSubmission(@RequestBody SubmissionDTO submissionDTO) {
+    public ResponseEntity<String> updateSubmission(@RequestBody SubmissionDTO submissionDTO) {
         try {
             submissionService.updateSubmission(submissionDTO.getId(), submissionDTO.getTitle(), submissionDTO.getContent(), submissionDTO.getSendingDate(), submissionDTO.getLastEdit());
             return ResponseEntity.ok("Sottomissione modificata");
         }
         catch(Exception ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
+
+    @PostMapping("/evaluateHackathonSubmissions")
+    public ResponseEntity<String> evaluateHackathonSubmissions(@RequestBody HackathonSubmissionsEvaluationDTO hackathonSubmissionsEvaluationDTO) {
+        try {
+            submissionService.evaluateHackathonSubmissions(hackathonSubmissionsEvaluationDTO.getJudgeId(), hackathonSubmissionsEvaluationDTO.getHackathonId(), hackathonSubmissionsEvaluationDTO.getJudgements());
+            return ResponseEntity.ok("Valutazione completata");
+        }
+        catch(Exception ex) {
+            return ResponseEntity.badRequest().build();
         }
     }
 }

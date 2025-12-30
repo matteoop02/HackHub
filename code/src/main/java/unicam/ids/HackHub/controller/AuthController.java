@@ -19,28 +19,28 @@ public class AuthController {
     private UserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<String> login(@RequestBody UserDTO userDTO) {
         User user = userService.login(userDTO);
         if(user != null) {
             return ResponseEntity.ok("Login effettuato");
         } else {
-            return ResponseEntity.status(401).body("Username o Password errati");
+            return ResponseEntity.badRequest().body("Username o Password errati");
         }
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<String> register(@RequestBody UserDTO userDTO) {
         try {
             if(userService.usernameAlreadyExist(userDTO.getUsername())) {
-                return ResponseEntity.status(401).body("Username già esistente");
+                return ResponseEntity.badRequest().body("Username già esistente");
             }
             if(userDTO.getPassword().length() < 5) {
-                return ResponseEntity.status(404).body("Password troppo corta. Inserire una password lunga almeno 5 caratteri");
+                return ResponseEntity.badRequest().body("Password troppo corta. Inserire una password lunga almeno 5 caratteri");
             }
             userService.register(userDTO);
             return ResponseEntity.ok("Registrazione completata");
         } catch(Exception ex) {
-                return ResponseEntity.status(400).body(ex.getMessage());
+                return ResponseEntity.badRequest().body(ex.getMessage());
         }
     }
 

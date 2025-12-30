@@ -3,30 +3,35 @@ package unicam.ids.HackHub.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import unicam.ids.HackHub.dto.ComplexDTO.HackathonSubmissionsEvaluationDTO;
 import unicam.ids.HackHub.dto.HackathonDTO;
+import unicam.ids.HackHub.dto.SubmissionDTO;
 import unicam.ids.HackHub.enums.HackathonState;
+import unicam.ids.HackHub.enums.SubmissionState;
 import unicam.ids.HackHub.model.Hackathon;
 import unicam.ids.HackHub.model.Submission;
 import unicam.ids.HackHub.model.Team;
 import unicam.ids.HackHub.model.User;
 import unicam.ids.HackHub.repository.HackathonRepository;
+import unicam.ids.HackHub.repository.SubmissionRepository;
 import unicam.ids.HackHub.repository.TeamRepository;
 import unicam.ids.HackHub.repository.UserRepository;
 
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class HackathonService {
     @Autowired
     private HackathonRepository hackathonRepository;
     @Autowired
+    private SubmissionRepository submissionRepository;
+    @Autowired
     private UserRepository userRepository;
     @Autowired
     private TeamRepository teamRepository;
+    @Autowired
+    private UserService userService;
 
     @Transactional(readOnly = true)
     public List<Hackathon> getAllHackathons() {

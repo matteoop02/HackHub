@@ -62,6 +62,9 @@ dependencies {
     // Mapper da DTO a Entity e viceversa
     implementation 'org.mapstruct:mapstruct:1.5.5.Final'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+
+    //Servizio invio mail
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
 }
 
 test {

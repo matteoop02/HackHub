@@ -7,6 +7,4 @@ import java.util.List;
 
 public interface HackathonRepository extends JpaRepository<Hackathon, Long> {
     public boolean existsByName(String name);
-    public List<Hackathon> findByPlace(String place);
-    public List<Hackathon> findByState(HackathonState state);
 }

@@ -28,7 +28,7 @@ public class TeamController {
     private HackathonRepository hackathonRepository;
 
     @PostMapping("/create")
-    public ResponseEntity<?> createTeam(@RequestBody UserTeamDTO userTeamDTO) {
+    public ResponseEntity<String> createTeam(@RequestBody UserTeamDTO userTeamDTO) {
         try {
             Optional<User> creator = userRepository.findByEmail(userTeamDTO.getUserDTO().getEmail());
             if(creator.isEmpty()) {
@@ -39,7 +39,7 @@ public class TeamController {
                 throw new IllegalArgumentException("Hakcathon non trovato");
             }
             List<User> members = userRepository.findAllById(userTeamDTO.getTeamDTO().getMembersIds());
-            Team team = teamService.createTeam(creator.get(), userTeamDTO.getTeamDTO().getName(), hackathon.get(), members);
+            teamService.createTeam(creator.get(), userTeamDTO.getTeamDTO().getName(), hackathon.get(), members);
             return ResponseEntity.ok("Team creato");
         }
         catch(Exception ex) {

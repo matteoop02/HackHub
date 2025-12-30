@@ -15,7 +15,7 @@ public class TeamService {
     private TeamRepository teamRepository;
 
     // Crea un nuovo team
-    public Team createTeam(User creator, String name, Hackathon hackathon, List<User> members) {
+    public void createTeam(User creator, String name, Hackathon hackathon, List<User> members) {
 
         String roleCategory = creator.getRole().getCategory();
         if (roleCategory.equals("STAFF"))
@@ -29,7 +29,6 @@ public class TeamService {
         if(isNameUsed)
             throw new IllegalArgumentException("Nome team già in uso");
 
-        //Creazione nuovo team
         Team team = new Team();
         team.setName(name);
         team.setHackathon(hackathon);
@@ -37,7 +36,6 @@ public class TeamService {
         members.add(creator);
         team.setMembers(members);
 
-        //Salvataggio nuovo team
-        return teamRepository.save(team);
+        teamRepository.save(team);
     }
 }
