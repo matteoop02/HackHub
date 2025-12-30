@@ -3,7 +3,8 @@ package unicam.ids.HackHub.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import unicam.ids.HackHub.dto.ComplexDTO.IscrizioneTeamDTO;
+import unicam.ids.HackHub.dto.ComplexDTO.HackathonSubmissionsEvaluationDTO;
+import unicam.ids.HackHub.dto.ComplexDTO.TeamSubscriptionDTO;
 import unicam.ids.HackHub.dto.ComplexDTO.UserHackathonDTO;
 import unicam.ids.HackHub.dto.HackathonDTO;
 import unicam.ids.HackHub.dto.UserDTO;
@@ -24,7 +25,7 @@ public class HackathonController {
     private UserRepository userRepository;
 
     @PostMapping("/create")
-    public ResponseEntity<?> createHackathon(@RequestBody UserHackathonDTO userHackathonDTO) {
+    public ResponseEntity<String> createHackathon(@RequestBody UserHackathonDTO userHackathonDTO) {
         try {
             Optional<User> creator = userRepository.findByEmail(userHackathonDTO.getUserDTO().getEmail());
             if(creator.isEmpty()) {
@@ -55,7 +56,7 @@ public class HackathonController {
     }
 
     @PostMapping("/signTeam")
-    public ResponseEntity<?> signTeam(@RequestBody IscrizioneTeamDTO iscrizioneTeamDTO) {
+    public ResponseEntity<String> signTeam(@RequestBody TeamSubscriptionDTO iscrizioneTeamDTO) {
         try {
             hackathonService.signTeamToHackathon(iscrizioneTeamDTO.getUserId(), iscrizioneTeamDTO.getHackathonId(), iscrizioneTeamDTO.getTeamId());
             return ResponseEntity.ok("Team iscritto all'hackathon");
