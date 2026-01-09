@@ -1,24 +1,28 @@
 package unicam.ids.HackHub.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import unicam.ids.HackHub.dto.ComplexDTO.UserTeamDTO;
+import unicam.ids.HackHub.dto.requests.CreateTeamRequest;
+import unicam.ids.HackHub.exceptions.ResourceNotFoundException;
 import unicam.ids.HackHub.model.Hackathon;
-import unicam.ids.HackHub.model.Team;
 import unicam.ids.HackHub.model.User;
 import unicam.ids.HackHub.repository.HackathonRepository;
 import unicam.ids.HackHub.repository.UserRepository;
-import unicam.ids.HackHub.services.TeamService;
+import unicam.ids.HackHub.service.TeamService;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/team")
+@RequestMapping("/utente")
 public class TeamController {
     @Autowired
     private TeamService teamService;
@@ -27,20 +31,36 @@ public class TeamController {
     @Autowired
     private HackathonRepository hackathonRepository;
 
-    @PostMapping("/create")
-    public ResponseEntity<String> createTeam(@RequestBody UserTeamDTO userTeamDTO) {
+    @PostMapping("/createTeam")
+    @Operation(
+            summary = "Creazione team",
+            description = "Permette a un utente registrato di creare un team",
+            requestBody = @RequestBody(
+                    description = "Team creato dall'utente",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "Esempio creazione team",
+                                    value = """
+                                    {
+                                      "CreateTeamRequest": {
+                                        "username": "matteop",
+                                        "name": "Borlotti",
+                                        "hackathonName": "Scienza",
+                                        "submissionTitle": "Nuove Scoperte"                                 
+                                    }
+                                    """
+                            )
+                    )
+            )
+    )
+    @ApiResponse(responseCode = "200", description = "Team creato con successo")
+    @ApiResponse(responseCode = "401", description = "Team non creato, dati non validi")
+    public ResponseEntity<String> createTeam(@RequestBody CreateTeamRequest createTeamRequest) {
         try {
-            Optional<User> creator = userRepository.findByEmail(userTeamDTO.getUserDTO().getEmail());
-            if(creator.isEmpty()) {
-                throw new IllegalArgumentException("Utente non trovato");
-            }
-            Optional<Hackathon> hackathon = hackathonRepository.findById(userTeamDTO.getTeamDTO().getHackathonId());
-            if(hackathon.isEmpty()) {
-                throw new IllegalArgumentException("Hakcathon non trovato");
-            }
-            List<User> members = userRepository.findAllById(userTeamDTO.getTeamDTO().getMembersIds());
-            teamService.createTeam(creator.get(), userTeamDTO.getTeamDTO().getName(), hackathon.get(), members);
-            return ResponseEntity.ok("Team creato");
+            teamService.createTeam(createTeamRequest);
+            return ResponseEntity.ok("Team creato con successo");
         }
         catch(Exception ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());

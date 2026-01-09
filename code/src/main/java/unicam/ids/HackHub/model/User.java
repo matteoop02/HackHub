@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
+
 import java.util.Date;
 
 @Getter
@@ -56,4 +58,9 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "TeamId", nullable = true)
     private Team team;
+
+    @NotNull
+    @ColumnDefault("FALSE")
+    @Column(name = "IS_DELETED", nullable = false)
+    private Boolean isDeleted = false;
 }

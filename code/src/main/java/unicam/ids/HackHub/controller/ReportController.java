@@ -7,8 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import unicam.ids.HackHub.dto.ComplexDTO.ViolationReportDTO;
-import unicam.ids.HackHub.services.TeamService;
-import unicam.ids.HackHub.services.UserService;
+import unicam.ids.HackHub.service.UserService;
 
 @RestController
 @RequestMapping("/api/report")

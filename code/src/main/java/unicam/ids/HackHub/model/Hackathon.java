@@ -59,4 +59,7 @@ public class Hackathon {
     @Enumerated(EnumType.STRING)
     @Column(name = "State", nullable = false)
     private HackathonState state;
+
+    @Column(name = "IsPublic", nullable = false)
+    private boolean isPublic;
 }
