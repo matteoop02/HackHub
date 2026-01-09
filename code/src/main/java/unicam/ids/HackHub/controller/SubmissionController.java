@@ -7,21 +7,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import unicam.ids.HackHub.dto.ComplexDTO.HackathonSubmissionsEvaluationDTO;
-import unicam.ids.HackHub.dto.ComplexDTO.UserHackathonDTO;
-import unicam.ids.HackHub.dto.ComplexDTO.UserTeamDTO;
-import unicam.ids.HackHub.dto.HackathonDTO;
-import unicam.ids.HackHub.dto.SubmissionDTO;
-import unicam.ids.HackHub.dto.UserDTO;
-import unicam.ids.HackHub.enums.SubmissionState;
+import unicam.ids.HackHub.dto.requests.CreateHackathonRequest;
 import unicam.ids.HackHub.model.Submission;
 import unicam.ids.HackHub.model.User;
-import unicam.ids.HackHub.repository.HackathonRepository;
 import unicam.ids.HackHub.repository.SubmissionRepository;
-import unicam.ids.HackHub.repository.TeamRepository;
 import unicam.ids.HackHub.repository.UserRepository;
-import unicam.ids.HackHub.services.SubmissionService;
-import unicam.ids.HackHub.services.UserService;
+import unicam.ids.HackHub.service.SubmissionService;
+import unicam.ids.HackHub.service.UserService;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,15 +33,10 @@ public class SubmissionController {
 
 
     @PostMapping("/listByHackathon")
-    public ResponseEntity<List<Submission>> getSubmissionsListByHackathonId(@RequestBody UserHackathonDTO userHackathonDTO) {
+    public ResponseEntity<List<Submission>> getSubmissionsListByHackathonName(@RequestBody String hackathonName) {
         try {
-            Optional<User> user = userRepository.findByEmail(userHackathonDTO.getUserDTO().getEmail());
-            if(!userService.isStaff(user.get())) {
-                throw new IllegalArgumentException("Accesso negato");
-            } else {
-                List<Submission> submmissions = submissionService.getSubmissionsByHackathonId(userHackathonDTO.getHackathonDTO().getId());
-                return ResponseEntity.ok(submmissions);
-            }
+            List<Submission> submmissions = submissionService.getSubmissionsByHackathonName(hackathonName);
+            return ResponseEntity.ok(submmissions);
         }
         catch (Exception ex) {
             return ResponseEntity.badRequest().build();
@@ -55,13 +44,9 @@ public class SubmissionController {
     }
 
     @PostMapping("/listByTeam")
-    public ResponseEntity<List<Submission>> getSubmissionsListByTeamId(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<List<Submission>> getSubmissionsListByTeamName(@RequestBody String teamName) {
         try {
-            Optional<User> user = userRepository.findByEmail(userDTO.getEmail());
-            if(user.isEmpty()) {
-                throw new IllegalArgumentException("Utente non trovato");
-            }
-            List<Submission> submissions = submissionService.getSubmissionsByTeamId(user.get().getTeam().getId());
+            List<Submission> submissions = submissionService.getSubmissionsByTeamName(teamName);
             return ResponseEntity.ok(submissions);
         }
         catch(Exception ex) {
@@ -70,9 +55,9 @@ public class SubmissionController {
     }
 
     @PostMapping("/update")
-    public ResponseEntity<String> updateSubmission(@RequestBody SubmissionDTO submissionDTO) {
+    public ResponseEntity<String> updateSubmission(@RequestBody String title, String content, Date sendingDate, Date lastEdit) {
         try {
-            submissionService.updateSubmission(submissionDTO.getId(), submissionDTO.getTitle(), submissionDTO.getContent(), submissionDTO.getSendingDate(), submissionDTO.getLastEdit());
+            submissionService.updateSubmission(title, content, sendingDate, lastEdit);
             return ResponseEntity.ok("Sottomissione modificata");
         }
         catch(Exception ex) {
@@ -83,7 +68,7 @@ public class SubmissionController {
     @PostMapping("/evaluateHackathonSubmissions")
     public ResponseEntity<String> evaluateHackathonSubmissions(@RequestBody HackathonSubmissionsEvaluationDTO hackathonSubmissionsEvaluationDTO) {
         try {
-            submissionService.evaluateHackathonSubmissions(hackathonSubmissionsEvaluationDTO.getJudgeId(), hackathonSubmissionsEvaluationDTO.getHackathonId(), hackathonSubmissionsEvaluationDTO.getJudgements());
+            //submissionService.evaluateHackathonSubmissions(hackathonSubmissionsEvaluationDTO.getJudgeId(), hackathonSubmissionsEvaluationDTO.getHackathonId(), hackathonSubmissionsEvaluationDTO.getJudgements());
             return ResponseEntity.ok("Valutazione completata");
         }
         catch(Exception ex) {

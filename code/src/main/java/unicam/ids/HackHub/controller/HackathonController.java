@@ -1,40 +1,39 @@
 package unicam.ids.HackHub.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import unicam.ids.HackHub.dto.ComplexDTO.HackathonSubmissionsEvaluationDTO;
-import unicam.ids.HackHub.dto.ComplexDTO.TeamSubscriptionDTO;
-import unicam.ids.HackHub.dto.ComplexDTO.UserHackathonDTO;
-import unicam.ids.HackHub.dto.HackathonDTO;
-import unicam.ids.HackHub.dto.UserDTO;
+import unicam.ids.HackHub.dto.ComplexDTO.TeamSubscriptionRequest;
+import unicam.ids.HackHub.dto.requests.CreateHackathonRequest;
 import unicam.ids.HackHub.model.Hackathon;
-import unicam.ids.HackHub.model.User;
 import unicam.ids.HackHub.repository.UserRepository;
-import unicam.ids.HackHub.services.HackathonService;
+import unicam.ids.HackHub.service.HackathonService;
+import unicam.ids.HackHub.service.UserService;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/hackathon")
+@Tag(name = "Hackathon", description = "Gestione degli hackathon")
 public class HackathonController {
     @Autowired
     private HackathonService hackathonService;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/create")
-    public ResponseEntity<String> createHackathon(@RequestBody UserHackathonDTO userHackathonDTO) {
+    @ApiResponse(responseCode = "200", description = "Utente registrato con successo")
+    @ApiResponse(responseCode = "400", description = "Richiesta non valida o dati mancanti")
+    public ResponseEntity<String> createHackathon(@RequestBody CreateHackathonRequest createHackathonRequest) {
         try {
-            Optional<User> creator = userRepository.findByEmail(userHackathonDTO.getUserDTO().getEmail());
-            if(creator.isEmpty()) {
-                throw new IllegalArgumentException("Utente non trovato");
-            }
-            if(!creator.get().getRole().getName().toString().equalsIgnoreCase("organizzatore")) {
-                throw new IllegalArgumentException("Solo l'organizzatore può creare un hackathon");
-            }
-            Hackathon hackathon = hackathonService.createHackathon(creator.get(), userHackathonDTO.getHackathonDTO().getName(), userHackathonDTO.getHackathonDTO().getPlace(), userHackathonDTO.getHackathonDTO().getRegulation(), userHackathonDTO.getHackathonDTO().getSubscriptionDeadline(), userHackathonDTO.getHackathonDTO().getStartDate(), userHackathonDTO.getHackathonDTO().getEndDate(), userHackathonDTO.getHackathonDTO().getReward(), userHackathonDTO.getHackathonDTO().getMaxTeamSize());
+            Hackathon hackathon = hackathonService.createHackathon(createHackathonRequest);
             return ResponseEntity.ok("Hackathon creato");
         }
         catch(Exception ex) {
@@ -43,12 +42,12 @@ public class HackathonController {
     }
 
     @PostMapping("/consultation")
-    public ResponseEntity<List<HackathonDTO>> getHackathonsList(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<List<Hackathon>> getHackathonsList(@RequestBody String username) {
         try {
-            if (userDTO.getEmail() == null || userDTO.getEmail().isEmpty()) {
-                return ResponseEntity.ok(hackathonService.getPublicHackathons());
-            }
-            return ResponseEntity.ok(hackathonService.getAllHackathonsAsDTO());
+            if (userService.existsUserByUsername(username))
+                return ResponseEntity.ok(hackathonService.getHackathons());
+
+            return ResponseEntity.ok(hackathonService.getHackathonsPublic());
         }
         catch(Exception ex) {
             return ResponseEntity.badRequest().build();
@@ -56,9 +55,9 @@ public class HackathonController {
     }
 
     @PostMapping("/signTeam")
-    public ResponseEntity<String> signTeam(@RequestBody TeamSubscriptionDTO iscrizioneTeamDTO) {
+    public ResponseEntity<String> signTeam(@RequestBody TeamSubscriptionRequest teamSubscriptionRequest) {
         try {
-            hackathonService.signTeamToHackathon(iscrizioneTeamDTO.getUserId(), iscrizioneTeamDTO.getHackathonId(), iscrizioneTeamDTO.getTeamId());
+            hackathonService.signTeamToHackathon(teamSubscriptionRequest.getUsername(), teamSubscriptionRequest.getHackathonName());
             return ResponseEntity.ok("Team iscritto all'hackathon");
         }
         catch(Exception ex) {

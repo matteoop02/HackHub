@@ -6,5 +6,7 @@ import unicam.ids.HackHub.model.UserRole;
 import java.util.Optional;
 
 public interface UserRoleRepository extends JpaRepository<UserRole, Long> {
-    public UserRole findByName(String name);
+    Optional<UserRole> findByName(String name);
+
+    Optional<UserRole> findByNameAndIsActiveTrue(String utente);
 }

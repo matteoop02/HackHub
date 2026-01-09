@@ -2,8 +2,6 @@ package unicam.ids.HackHub.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import unicam.ids.HackHub.model.User;
-
-import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -11,4 +9,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
     Optional<User> findByUsernameAndPassword(String username, String password);
     Optional<User> findByEmail(String email);
+
+    Optional<User> findByIdAndIsDeletedFalse(int id);
+
+    Optional<User> findByEmailAndIsDeletedFalse(String email);
+
+    Optional<User> findByUsername(String username);
 }

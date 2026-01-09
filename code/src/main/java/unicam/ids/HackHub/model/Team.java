@@ -37,4 +37,20 @@ public class Team {
     @ManyToMany
     @JoinTable(name = "MENTORI", joinColumns = @JoinColumn(name = "TeamId"), inverseJoinColumns = @JoinColumn(name = "UserId"))
     private List<User> mentors;
+
+    public void addMember(User user) {
+        members.add(user);
+    }
+
+    public void addMentor(User user) {
+        mentors.add(user);
+    }
+
+    public void removeMember(User user) {
+        members.remove(user);
+    }
+
+    public void removeMentor(User user) {
+        mentors.remove(user);
+    }
 }
