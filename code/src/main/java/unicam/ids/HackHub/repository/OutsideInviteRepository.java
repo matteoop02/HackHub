@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import unicam.ids.HackHub.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,10 +17,6 @@ public interface OutsideInviteRepository extends JpaRepository<InviteOutsidePlat
 
     Optional<InviteOutsidePlatform> findByInviteToken(String token);
 
-    List<InviteOutsidePlatform> findBySenderIdAndStatus(Long senderId, InviteState status);
-
-    List<InviteOutsidePlatform> findByRecipientEmail(String email);
-
     @Query("SELECT i FROM InviteOutsidePlatform i WHERE i.status = :status AND i.expiresAt < :dateTime")
     List<InviteOutsidePlatform> findExpiredInvites(
             @Param("status") InviteState status,
@@ -27,4 +24,8 @@ public interface OutsideInviteRepository extends JpaRepository<InviteOutsidePlat
     );
 
     boolean existsByRecipientEmailAndStatus(String email, InviteState status);
+
+    boolean existsBySenderUserAndRecipientEmailAndStatus(User senderUser, String recipientEmail, InviteState status);
+
+    List<InviteOutsidePlatform> findByRecipientEmailAndStatus(String email, InviteState inviteState);
 }

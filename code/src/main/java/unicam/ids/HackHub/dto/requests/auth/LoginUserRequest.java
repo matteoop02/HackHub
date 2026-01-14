@@ -1,6 +1,5 @@
-package unicam.ids.HackHub.dto.requests;
+package unicam.ids.HackHub.dto.requests.auth;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 
 public record LoginUserRequest(

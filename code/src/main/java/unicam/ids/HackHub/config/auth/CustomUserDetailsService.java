@@ -15,11 +15,9 @@ import java.util.Collections;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserRepository userRepository;
     private final UserService userService;
 
     public CustomUserDetailsService(UserRepository userRepository, UserService userService) {
-        this.userRepository = userRepository;
         this.userService = userService;
     }
 

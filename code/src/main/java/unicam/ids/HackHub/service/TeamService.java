@@ -1,77 +1,126 @@
 package unicam.ids.HackHub.service;
 
 import jakarta.transaction.Transactional;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import unicam.ids.HackHub.dto.requests.CreateTeamRequest;
 import unicam.ids.HackHub.exceptions.ResourceNotFoundException;
-import unicam.ids.HackHub.model.Hackathon;
 import unicam.ids.HackHub.model.Team;
 import unicam.ids.HackHub.model.User;
 import unicam.ids.HackHub.model.UserRole;
-import unicam.ids.HackHub.repository.HackathonRepository;
-import unicam.ids.HackHub.repository.SubmissionRepository;
 import unicam.ids.HackHub.repository.TeamRepository;
-import unicam.ids.HackHub.repository.UserRepository;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.HashSet;
+
 
 @Service
 public class TeamService {
-
     @Autowired
     private TeamRepository teamRepository;
+    @Autowired
     private UserService userService;
-    private HackathonService hackathonService;
 
-    // Crea un nuovo team
     @Transactional
-    public void createTeam(CreateTeamRequest createTeamRequest) {
-        //Controllo se l'utente esiste
-        User user = userService.findUserByUsername(createTeamRequest.getUsername());
-        //Controllo se l'hackathon esiste
-        Hackathon hackathon = hackathonService.getHackathonByName(createTeamRequest.getHackathonName());
+    public void createTeam(Authentication authentication, CreateTeamRequest request) {
+        //Recupero l'utente autenticato
+        User user = userService.findUserByUsername(authentication.getName());
 
-        boolean isAlreadyInTeam = teamRepository.existsByMembersContainsAndHackathon(user, hackathon);
-        if (isAlreadyInTeam)
-            throw new IllegalArgumentException("Utente già membro di un team");
+        if(existsByName(request.name()))
+            throw new IllegalArgumentException("Nome team già in uso!");
 
-        String name = createTeamRequest.getName();
-        boolean isNameUsed = teamRepository.existsByNameAndHackathon(name, hackathon);
-        if(isNameUsed)
-            throw new IllegalArgumentException("Nome team già in uso");
+        //Creo il nuovo team
+        Team team = Team.builder()
+                .name(request.name())
+                .teamLeader(user)
+                .isPublic(request.isPublic())
+                .build();
 
-        Team team = new Team();
-        team.setName(name);
-        team.setHackathon(hackathon);
-        team.setTeamLeader(user);
-        team.addMember(user);
+        //Aggiungo l'utente alla lista dei membri
+        team.setMembers(new ArrayList<>());
+        team.setMentors(new ArrayList<>());
 
-        teamRepository.save(team);
+        team.getMembers().add(user);
+
+        userService.changeRole(user, 3L);   //Cambio ruolo all'utente in Leader del Team
+        userService.assignTeamToUser(user.getUsername(), team); //Assegno il team all'utente
+
+        userService.save(user);
+        save(team);
     }
 
     @Transactional
-    public void addMemberToTeam(String teamName, String username) {
-        //Controllo se l'utente esiste
-        User user = userService.findUserByUsername(username);
-
-        //Controllo se il team esiste
-        Team team = teamRepository.findByName(teamName)
-                .orElseThrow(() -> new ResourceNotFoundException("Team non trovato"));
-
-        // Controlla se l'utente è già nel team
-        if (team.getMembers().contains(user)) {
+    public void addMemberToTeam(Team team, User user, UserRole proposedRole) {
+        if (team.getMembers().contains(user))
             throw new IllegalArgumentException("Utente è già nel team");
-        }
 
         team.getMembers().add(user); // aggiungi l'utente
-        teamRepository.save(team);   // salva il team
+
+        if (proposedRole.equals(team.getTeamLeader().getRole())) {
+            userService.changeRole(team.getTeamLeader(), 2L);   //Il leader diventa membro
+            userService.changeRole(user, 3L);   //User diventa leader
+        }
+        else
+            userService.changeRole(user, 2L); //Set all'utente il ruolo proposto
+
+        userService.assignTeamToUser(user.getUsername(), team); //Assegno il team all'utente
+
+        save(team);   // salva il team
+    }
+
+    @Transactional
+    public void joinToTeam(Authentication authentication, String teamName) {
+        Team team = findByName(teamName);
+
+        if (!team.isPublic())
+            throw new IllegalArgumentException("Impossibile unirsi a un team privato!");
+
+        User user = userService.findUserByUsername(authentication.getName());
+        team.addMember(user);
+
+        userService.changeRole(user, 2L); //Set all'utente il ruolo di membro
+        userService.assignTeamToUser(user.getUsername(), team); //Assegno il team all'utente
+
+        save(team);
+    }
+
+    @Transactional
+    public void deleteMemberToTeam(Authentication authentication, String memberUsername) {
+        User leader = userService.findUserByUsername(authentication.getName());
+        User member = userService.findUserByUsername(memberUsername);
+        Team team = leader.getTeam();
+
+        if (!team.getMembers().contains(member))
+            throw new IllegalArgumentException("Utente non è nel team");
+
+        team.getMembers().remove(member); // rimozione l'utente
+        save(team);   // salva il team
+    }
+
+    @Transactional
+    public void leaveTeam(Authentication authentication, @Valid String teamName) {
+        Team team = findByName(teamName);
+
+        User user = userService.findUserByUsername(authentication.getName());
+        team.removeMember(user);
+
+        userService.changeRole(user, 1L); //Set all'utente il ruolo di utente
+
+        save(team);
+    }
+
+    public boolean existsByName(String nameTeam) {
+        return teamRepository.existsByName(nameTeam);
     }
 
     public Team findByName(String teamName) {
         return teamRepository.findByName(teamName)
                 .orElseThrow(() -> new ResourceNotFoundException("Team non trovato"));
+    }
+
+    public void save(Team team) {
+        teamRepository.save(team);
     }
 }

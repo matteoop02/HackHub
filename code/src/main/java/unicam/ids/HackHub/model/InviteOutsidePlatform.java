@@ -25,11 +25,9 @@ public class InviteOutsidePlatform implements Invite {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "sender_id", nullable = false)
-    private Long senderId;
-
-    @Column(name = "sender_name", nullable = false)
-    private String senderName;
+    @ManyToOne
+    @JoinColumn(name = "senderUserId", nullable = false)
+    private User senderUser;
 
     @Column(name = "recipient_email", nullable = false)
     private String recipientEmail;

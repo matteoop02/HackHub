@@ -1,12 +1,12 @@
 package unicam.ids.HackHub.service.auth;
 
 import unicam.ids.HackHub.config.auth.CustomUserDetailsService;
-import unicam.ids.HackHub.dto.requests.LoginUserRequest;
-import unicam.ids.HackHub.dto.requests.RegisterUserRequest;
+import unicam.ids.HackHub.dto.requests.auth.LoginUserRequest;
+import unicam.ids.HackHub.dto.requests.auth.RegisterUserRequest;
 import unicam.ids.HackHub.dto.responses.AuthResponse;
-import unicam.ids.HackHub.exceptions.auth.EmailAlreadyExistsException;
 import unicam.ids.HackHub.model.User;
 import unicam.ids.HackHub.repository.UserRepository;
+import unicam.ids.HackHub.service.UserRoleService;
 import unicam.ids.HackHub.service.UserService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,19 +24,21 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final CustomUserDetailsService customUserDetailsService;
+    private final UserRoleService userRoleService;
 
     public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        UserService userService,
                        AuthenticationManager authenticationManager,
                        JwtService jwtService,
-                       CustomUserDetailsService customUserDetailsService) {
+                       CustomUserDetailsService customUserDetailsService, UserRoleService userRoleService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.customUserDetailsService = customUserDetailsService;
+        this.userRoleService = userRoleService;
     }
 
     // Registra un utente
@@ -53,7 +55,7 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.password()));
         user.setName(request.name());
         user.setSurname(request.surname());
-        user.setRole(userService.getUserRoleById(request.roleId()));
+        user.setRole(userRoleService.findUserRoleById(request.roleId()));
         user.setDateOfBirth(request.dateOfBirth());
 
         // Salva l'utente

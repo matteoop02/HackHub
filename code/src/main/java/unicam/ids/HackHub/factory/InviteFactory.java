@@ -4,6 +4,7 @@ import unicam.ids.HackHub.enums.InviteState;
 import unicam.ids.HackHub.model.InviteInsidePlatform;
 import unicam.ids.HackHub.model.InviteOutsidePlatform;
 import org.springframework.stereotype.Component;
+import unicam.ids.HackHub.model.User;
 import unicam.ids.HackHub.model.UserRole;
 
 import java.time.LocalDateTime;
@@ -16,12 +17,12 @@ public class InviteFactory {
     private static final int TEAM_INVITE_EXPIRY_DAYS = 30;
 
     public InviteOutsidePlatform createOutsideInvite(
-            String senderName,
+            User senderUser,
             String recipientEmail,
             String message) {
 
         return InviteOutsidePlatform.builder()
-                .senderName(senderName)
+                .senderUser(senderUser)
                 .recipientEmail(recipientEmail)
                 .inviteToken(generateToken())
                 .status(InviteState.PENDING)
@@ -31,17 +32,12 @@ public class InviteFactory {
                 .build();
     }
 
-    public InviteInsidePlatform createTeamInvite(
-            String senderUsername,
-            String recipientUsername,
-            String teamName,
-            UserRole proposedRole,
-            String message) {
+    public InviteInsidePlatform createTeamInvite(User senderUser, User recipientUser, UserRole proposedRole, String message) {
 
         return InviteInsidePlatform.builder()
-                .senderUsername(senderUsername)
-                .recipientUsername(recipientUsername)
-                .teamName(teamName)
+                .senderUser(senderUser)
+                .recipientUser(recipientUser)
+                .team(senderUser.getTeam())
                 .proposedRole(proposedRole)
                 .status(InviteState.PENDING)
                 .createdAt(LocalDateTime.now())

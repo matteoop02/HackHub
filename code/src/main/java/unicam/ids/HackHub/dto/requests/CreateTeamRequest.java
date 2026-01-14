@@ -1,17 +1,12 @@
 package unicam.ids.HackHub.dto.requests;
 
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
 
-@Data
-public class CreateTeamRequest {
-    private String username;
+public record CreateTeamRequest(
+        @NotEmpty(message = "Il nome del team non può essere nullo")
+        String name,
 
-    @NotNull(message = "Il nome del team non può essere nullo")
-    private String name;
-
-    @NotNull(message = "Il nome dell'hackathon di riferimento non può essere nullo")
-    private String hackathonName;
-
-    private String submissionName;
-}
+        @NotNull(message = "Specificare se il team sarà Pubblico (true) o Privato (false)")
+        boolean isPublic
+) {}

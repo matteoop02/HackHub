@@ -8,8 +8,7 @@ import unicam.ids.HackHub.model.User;
 import java.util.Optional;
 
 public interface TeamRepository extends JpaRepository<Team, Long> {
-    boolean existsByMembersContainsAndHackathon(User user, Hackathon hackathon);
-    boolean existsByNameAndHackathon(String name, Hackathon hackathon);
-
+    boolean existsByMembersContains(User user);
+    boolean existsByName(String name);
     Optional<Team> findByName(String teamName);
 }

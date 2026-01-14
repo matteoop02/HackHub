@@ -1,23 +1,17 @@
 package unicam.ids.HackHub.dto.requests;
 
-import unicam.ids.HackHub.model.UserRole;
-import lombok.Data;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-@Data
-public class InsideInviteRequest {
-    @NotBlank(message = "Lo username mittente è obbligatorio")
-    private String senderUsername;
+public record InsideInviteRequest (
+        @NotEmpty(message = "Lo username mittente è obbligatorio")
+        String senderUsername,
 
-    @NotBlank(message = "Lo username destinatario è obbligatorio")
-    private String recipientUsername;
+        @NotEmpty(message = "Lo username destinatario è obbligatorio")
+        String recipientUsername,
 
-    @NotBlank(message = "Il nome del team è obbligatorio")
-    private String teamName;
+        @NotNull(message = "L'id del ruolo proposto è obbligatorio")
+        Long proposedRoleId,
 
-    @NotNull(message = "Il ruolo proposto è obbligatorio")
-    private UserRole proposedRole;
-
-    private String message;
-}
+        String message
+) {}

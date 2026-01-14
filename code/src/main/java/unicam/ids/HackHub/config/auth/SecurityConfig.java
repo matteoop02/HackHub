@@ -7,11 +7,14 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import unicam.ids.HackHub.config.filter.JwtAuthenticationFilter;
+import org.springframework.security.authorization.AuthorizationDecision;
 
 @Configuration
 @EnableWebSecurity
@@ -29,7 +32,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
 
                         // Public APIs
@@ -41,15 +44,45 @@ public class SecurityConfig {
                                 "/api-docs/**",
                                 "/h2-console/**",
                                 "/public/**",
-                                "/error/**"
+                                "/error/**",
+                                "api/hackathon/public/**",
+                                "api/invites/public/**"
                         ).permitAll()
 
-                        // Role-based protected APIs
-                        .requestMatchers("/utente/**").hasRole("UTENTE")
-                        .requestMatchers("/team/**").hasAnyRole("MEMBRO_DEL_TEAM", "LEADER_DEL_TEAM")
-                        .requestMatchers("/mentore/**").hasRole("MENTORE")
-                        .requestMatchers("/organizzatore/**").hasRole("ORGANIZZATORE")
-                        .requestMatchers("/giudice/**").hasRole("GIUDICE")
+                        // Role-based protected APIs - USA PATTERN ESPLICITI
+                        //TEAM - OK
+                        .requestMatchers("/api/team/utente/**").hasRole("UTENTE")
+                        .requestMatchers("/api/team/membroDelTeam/**").hasRole("MEMBRO_DEL_TEAM")
+                        .requestMatchers("/api/team/leaderDelTeam/**").hasRole("LEADER_DEL_TEAM")
+
+                        // HACKATHON - OK
+                        .requestMatchers("/api/hackathon/leaderDelTeam/**").hasRole("LEADER_DEL_TEAM")
+                        .requestMatchers("/api/hackathon/giudice/**").hasRole("GIUDICE")
+                        .requestMatchers("/api/hackathon/organizzatore/**").hasRole("ORGANIZZATORE")
+
+                        //INVITE - OK
+                        .requestMatchers("/api/invites/outside/**")
+                        .access((authentication, context) -> {
+                            boolean forbidden = authentication.get().getAuthorities().stream()
+                                    .anyMatch(a -> a.getAuthority().equals("UTENTE") ||
+                                            a.getAuthority().equals("MEMBRO_DEL_TEAM") ||
+                                            a.getAuthority().equals("LEADER_DEL_TEAM") ||
+                                            a.getAuthority().equals("MENTORE") ||
+                                            a.getAuthority().equals("GIUDICE") ||
+                                            a.getAuthority().equals("ORGANIZZATORE"));
+
+                            return new AuthorizationDecision(!forbidden);
+                        })
+                        .requestMatchers("/api/invites/inviteManage/**").hasAnyRole("UTENTE", "MEMBRO_DEL_TEAM", "LEADER_DEL_TEAM")
+                        .requestMatchers("/api/invites/leaderDelTeam/**").hasRole("LEADER_DEL_TEAM")
+
+                        //SUBMISSION - OK
+                        .requestMatchers("/api/submission/staff/**").hasAnyRole("MENTORE", "GIUDICE", "ORGANIZZATORE")
+                        .requestMatchers("/api/submission/team/**").hasAnyRole("MEMBRO_DEL_TEAM", "LEADER_DEL_TEAM")
+                        .requestMatchers("/api/submission/judge/**").hasRole("GIUDICE")
+
+                        //REPORT - OK
+                        .requestMatchers("/api/report/mentor/**").hasRole("MENTORE")
 
                         // Anything else requires authentication
                         .anyRequest().authenticated()
@@ -57,10 +90,10 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .formLogin(form -> form.disable())
-                .httpBasic(basic -> basic.disable())
-                .logout(logout -> logout.disable())
-                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .logout(AbstractHttpConfigurer::disable)
+                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .userDetailsService(userDetailsService)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

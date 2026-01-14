@@ -1,18 +1,36 @@
 package unicam.ids.HackHub.dto.requests;
 
-import lombok.Data;
+import jakarta.validation.constraints.*;
+import unicam.ids.HackHub.validation.ChronologicalDates;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
-@Data
-public class CreateHackathonRequest {
-    private String name;
-    private String place;
-    private String regulation;
-    private Date subscriptionDeadline;
-    private Date startDate;
-    private Date endDate;
-    private double reward;
-    private int maxTeamSize;
+@ChronologicalDates
+public record CreateHackathonRequest(
+        @NotEmpty(message = "Nome obbligatorio")
+        String name,
 
-}
+        @NotEmpty(message = "Luogo obbligatorio")
+        String place,
+
+        @NotEmpty(message = "Regolamento obbligatorio")
+        String regulation,
+
+        @NotNull(message = "Limite invio sottomissione obbligatorio")
+        LocalDateTime subscriptionDeadline,
+
+        @NotNull(message = "Data inizio obbligatoria")
+        LocalDateTime startDate,
+
+        @NotNull(message = "Data fine obbligatoria")
+        LocalDateTime endDate,
+
+        @Positive(message = "Importo del premio deve essere positivo")
+        double reward,
+
+        @Positive(message = "Massima dimensione dei team deve essere positiva")
+        int maxTeamSize,
+
+        boolean isPublic
+) {}
+

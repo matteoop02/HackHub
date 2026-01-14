@@ -5,15 +5,18 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import unicam.ids.HackHub.dto.ComplexDTO.TeamSubscriptionRequest;
 import unicam.ids.HackHub.dto.requests.CreateHackathonRequest;
+import unicam.ids.HackHub.dto.requests.SignTeamRequest;
+import unicam.ids.HackHub.dto.requests.UpdateHackathonStartDateRequest;
 import unicam.ids.HackHub.model.Hackathon;
-import unicam.ids.HackHub.repository.UserRepository;
+import unicam.ids.HackHub.model.Report;
+import unicam.ids.HackHub.model.Submission;
 import unicam.ids.HackHub.service.HackathonService;
-import unicam.ids.HackHub.service.UserService;
 
 import java.util.List;
 
@@ -21,32 +24,30 @@ import java.util.List;
 @RequestMapping("/api/hackathon")
 @Tag(name = "Hackathon", description = "Gestione degli hackathon")
 public class HackathonController {
+
     @Autowired
     private HackathonService hackathonService;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private UserService userService;
 
-    @PostMapping("/create")
-    @ApiResponse(responseCode = "200", description = "Utente registrato con successo")
-    @ApiResponse(responseCode = "400", description = "Richiesta non valida o dati mancanti")
-    public ResponseEntity<String> createHackathon(@RequestBody CreateHackathonRequest createHackathonRequest) {
-        try {
-            Hackathon hackathon = hackathonService.createHackathon(createHackathonRequest);
-            return ResponseEntity.ok("Hackathon creato");
-        }
-        catch(Exception ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
-        }
-    }
+    //--------------------------------- GET VARI ---------------------------------
 
-    @PostMapping("/consultation")
-    public ResponseEntity<List<Hackathon>> getHackathonsList(@RequestBody String username) {
+    @GetMapping("/public")
+    @Operation(
+            summary = "Consultazione Hackathon",
+            description = """
+        Restituisce la lista degli hackathon.
+        Se l'utente è autenticato → ritorna tutti gli hackathon (pubblici + privati).
+        Se l'utente non è autenticato → ritorna solo gli hackathon pubblici.
+    """
+    )
+    @ApiResponse(responseCode = "200", description = "Lista hackathon ottenuta con successo")
+    @ApiResponse(responseCode = "400", description = "Errore nella richiesta o dati non validi")
+    public ResponseEntity<List<Hackathon>> getHackathonsList(Authentication authentication) {
         try {
-            if (userService.existsUserByUsername(username))
+            // Se l'utente è autenticato, restituisci tutti gli hackathon
+            if (authentication != null && authentication.isAuthenticated())
                 return ResponseEntity.ok(hackathonService.getHackathons());
 
+            // Altrimenti restituisci solo quelli pubblici
             return ResponseEntity.ok(hackathonService.getHackathonsPublic());
         }
         catch(Exception ex) {
@@ -54,14 +55,320 @@ public class HackathonController {
         }
     }
 
-    @PostMapping("/signTeam")
-    public ResponseEntity<String> signTeam(@RequestBody TeamSubscriptionRequest teamSubscriptionRequest) {
+    @GetMapping("/public/info")
+    @Operation(
+            summary = "Visualizza informazioni Hackathon",
+            description = """
+        Restituisce le informazioni di un hackathon.
+        Se l'utente è autenticato → ritorna le informazioni di un hackathon (pubblici + privati).
+        Se l'utente non è autenticato → ritorna solo le informazioni gli hackathon pubblici.
+    """
+    )
+    @ApiResponse(responseCode = "200", description = "Informazioni hackathon ottenute con successo")
+    @ApiResponse(responseCode = "400", description = "Errore nella richiesta o dati non validi")
+    public ResponseEntity<Hackathon> getHackathonInfo(Authentication authentication, @RequestBody @Valid String hackathonName) {
         try {
-            hackathonService.signTeamToHackathon(teamSubscriptionRequest.getUsername(), teamSubscriptionRequest.getHackathonName());
-            return ResponseEntity.ok("Team iscritto all'hackathon");
+            // Se l'utente è autenticato, restituisci tutti gli hackathon
+            if (authentication != null && authentication.isAuthenticated())
+                return ResponseEntity.ok(hackathonService.findHackathonInfo(hackathonName));
+
+            // Altrimenti restituisci solo quelli pubblici
+            return ResponseEntity.ok(hackathonService.findPublicHackathonInfo(hackathonName));
         }
         catch(Exception ex) {
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/giudice/getSubmissions")
+    @Operation(
+            summary = "Visualizza le sottomissioni di un Hackathon",
+            description = """
+        Restituisce le sottomissioni di un hackathon.
+    """
+    )
+    @ApiResponse(responseCode = "200", description = "Informazioni hackathon ottenute con successo")
+    @ApiResponse(responseCode = "400", description = "Errore nella richiesta o dati non validi")
+    public ResponseEntity<List<Submission>> getHackathonSubmissions(Authentication authentication) {
+        try {
+            return ResponseEntity.ok(hackathonService.getHackathonSubmissions(authentication));
+        }
+        catch(Exception ex) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    //--------------------------------- CREA HACKATHON ---------------------------------
+
+    @PostMapping("/organizzatore/create")
+    @Operation(
+            summary = "Creazione nuovo hackathon",
+            description = "Permette la registrazione di un nuovo hackathon",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Dati dell'hackathon da registrare",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "Esempio registrazione",
+                                    value = """
+                        {
+                          "name": "Hackathon Innovazione 2026",
+                          "place": "Camerino",
+                          "regulation": "Lorem ipsum dolor sit amet...",
+                          "subscriptionDeadline": "2026-02-15",
+                          "startDate": "2026-03-01",
+                          "endDate": "2026-03-03",
+                          "reward": 5000.0,
+                          "maxTeamSize": 5,
+                          "isPublic": true
+                        }
+                    """
+                            )
+                    )
+            )
+    )
+    @ApiResponse(responseCode = "200", description = "Utente registrato con successo")
+    @ApiResponse(responseCode = "400", description = "Richiesta non valida o dati mancanti")
+    public ResponseEntity<String> createHackathon(Authentication authentication, @RequestBody @Valid CreateHackathonRequest createHackathonRequest) {
+        try {
+            hackathonService.createHackathon(authentication, createHackathonRequest);
+            return ResponseEntity.ok("Hackathon creato con successo");
+        }
+        catch (Exception ex) {
+            return ResponseEntity.badRequest().body("Errore! Creazione Hackathon fallita! \n" + ex.getMessage());
+        }
+    }
+
+    //--------------------------------- MODIFICHE HACKATHON ---------------------------------
+
+    @PostMapping("/organizzatore/updateStartDate")
+    @Operation(
+            summary = "Aggiorno data inizio",
+            description = """
+        Permette ad un organizzatore di aggiornare la data di inizio hackathon.
+        Di conseguenza modifica la scadenza dell'invio delle sottomissioni.
+    """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "Dati per l'aggiornamento della data di inizio",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "Esempio iscrizione giudice",
+                                    value = """
+                {
+                    "startDate": "2026-04-08 12:30"
+                }
+                """
+                            )
+                    )
+            )
+    )
+    @ApiResponse(responseCode = "200", description = "Data di inzio aggiornata con successo")
+    @ApiResponse(responseCode = "400", description = "Errore durante l'aggiornamento della data")
+    public ResponseEntity<String> updateStartDate(@RequestBody @Valid UpdateHackathonStartDateRequest  updateHackathonStartDateRequest) {
+        try {
+            hackathonService.updateStartDate(updateHackathonStartDateRequest);
+            return ResponseEntity.ok("Data aggiornata con successo");
+        } catch(Exception ex) {
+            return ResponseEntity.badRequest().body("Aggiornamento data di inizio hackathon fallito! " + ex.getMessage());
+        }
+    }
+
+    //--------------------------------- GESTIONE TEAM ---------------------------------
+
+    @PostMapping("/leaderDelTeam/signTeam")
+    @Operation(
+            summary = "Iscrizione Team ad un Hackathon",
+            description = """
+        Permette ad un team di iscriversi ad un hackathon.
+        Richiede username del team leader e nome dell'hackathon.
+    """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "Dati per l'iscrizione del team",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "Esempio iscrizione team",
+                                    value = """
+                        {
+                          "hackathonName": "Hackathon Innovazione 2026"
+                        }
+                    """
+                            )
+                    )
+            )
+    )
+    @ApiResponse(responseCode = "200", description = "Team iscritto con successo all'hackathon")
+    @ApiResponse(responseCode = "400", description = "Errore durante l'iscrizione del team")
+    public ResponseEntity<String> signTeam(Authentication authentication, @RequestBody @Valid SignTeamRequest signTeamRequest) {
+
+        try {
+            hackathonService.signTeamToHackathon(authentication, signTeamRequest);
+            return ResponseEntity.ok("Team iscritto all'hackathon con successo");
+        } catch(Exception ex) {
+            return ResponseEntity.badRequest().body("Iscrizione del team all'hackathon fallita! " + ex.getMessage());
+        }
+    }
+
+    @PostMapping("/leaderDelTeam/unsubscribeTeam")
+    @Operation(
+            summary = "Disiscrizione Team da un Hackathon",
+            description = """
+        Permette ad un team di disiscriversi da un hackathon.
+        Richiede l'operazione venga fatta dal leader del team.
+    """
+    )
+    @ApiResponse(responseCode = "200", description = "Team disiscritto con successo dall'hackathon")
+    @ApiResponse(responseCode = "400", description = "Errore durante la disiscrizione del team")
+    public ResponseEntity<String> unsubscribeTeam(Authentication authentication) {
+        try {
+            hackathonService.unsubscribeTeamToHackathon(authentication);
+            return ResponseEntity.ok("Team disiscritto dall'hackathon con successo");
+        } catch(Exception ex) {
+            return ResponseEntity.badRequest().body("Disiscrizione del team dall'hackathon fallita! " + ex.getMessage());
+        }
+    }
+
+    //--------------------------------- GESTIONE STAFF ---------------------------------
+
+    @PostMapping("/organizzatore/setJudge")
+    @Operation(
+            summary = "Aggiunta di un giudice ad un Hackathon",
+            description = """
+        Permette ad un organizzatore di aggiungere un giudice.
+        Richiede username del giudice e nome dell'hackathon.
+    """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "Dati per l'iscrizione del giudice",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "Esempio iscrizione giudice",
+                                    value = """
+                {
+                    "judgeUsername": "Filipp"
+                    "hackathonName": "Hackathon Innovazione 2026"
+                }
+                """
+                            )
+                    )
+            )
+    )
+    @ApiResponse(responseCode = "200", description = "Giudice iscritto con successo all'hackathon")
+    @ApiResponse(responseCode = "400", description = "Errore durante l'iscrizione del giudice")
+    public ResponseEntity<String> setJudge(@RequestBody @Valid String judgeUsername, String hackathonName) {
+        try {
+            hackathonService.setJudge(hackathonName, judgeUsername);
+            return ResponseEntity.ok("Giudice iscritto all'hackathon con successo");
+        } catch(Exception ex) {
+            return ResponseEntity.badRequest().body("Iscrizione del giudice all'hackathon fallita! " + ex.getMessage());
+        }
+    }
+
+    @PostMapping("/organizzatore/addMentor")
+    @Operation(
+            summary = "Aggiunta di un mentore ad un Hackathon",
+            description = """
+        Permette ad un organizzatore di aggiungere un mentore.
+        Richiede username del mentore e nome dell'hackathon.
+    """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "Dati per l'iscrizione del mentore",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "Esempio iscrizione giudice",
+                                    value = """
+                {
+                    "mentorUsername": "Filipp"
+                    "hackathonName": "Hackathon Innovazione 2026"
+                }
+                """
+                            )
+                    )
+            )
+    )
+    @ApiResponse(responseCode = "200", description = "Mentore iscritto con successo all'hackathon")
+    @ApiResponse(responseCode = "400", description = "Errore durante l'iscrizione del mentore")
+    public ResponseEntity<String> addMentor(@RequestBody @Valid String mentorUsername, String hackathonName) {
+        try {
+            hackathonService.addMentor(hackathonName, mentorUsername);
+            return ResponseEntity.ok("Mentore iscritto all'hackathon con successo");
+        } catch(Exception ex) {
+            return ResponseEntity.badRequest().body("Iscrizione del mentore all'hackathon fallita! " + ex.getMessage());
+        }
+    }
+
+    @PostMapping("/organizzatore/removeMentor")
+    @Operation(
+            summary = "Rimovìzione di un mentore ad un Hackathon",
+            description = """
+        Permette ad un organizzatore di rimuovere un mentore.
+        Richiede username del mentore e nome dell'hackathon.
+    """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "Dati per la rimozione del mentore",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "Esempio iscrizione giudice",
+                                    value = """
+                {
+                    "mentorUsername": "Filipp"
+                    "hackathonName": "Hackathon Innovazione 2026"
+                }
+                """
+                            )
+                    )
+            )
+    )
+    @ApiResponse(responseCode = "200", description = "Mentore rimosso con successo all'hackathon")
+    @ApiResponse(responseCode = "400", description = "Errore durante la rimozione del mentore")
+    public ResponseEntity<String> removeMentor(@RequestBody @Valid String mentorUsername, String hackathonName) {
+        try {
+            hackathonService.removeMentor(hackathonName, mentorUsername);
+            return ResponseEntity.ok("Mentore rimosso dall'hackathon con successo");
+        } catch(Exception ex) {
+            return ResponseEntity.badRequest().body("Rimozione del mentore all'hackathon fallita! " + ex.getMessage());
+        }
+    }
+
+    //--------------------------------- VINCITORE E PREMIO ---------------------------------
+
+    @PostMapping("/organizzatore/declareWinner")
+    @Operation(
+            summary = "Dichiara il vincitore dell'hackathon",
+            description = "Permette la proclamazione del vincitore",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Dati per la proclamazione",
+                    required = true,
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    name = "Esempio proclamazione",
+                                    value = """
+                        {
+                          "teamName": "Team Borlotti",
+                        }
+                    """
+                            )
+                    )
+            )
+    )
+    @ApiResponse(responseCode = "200", description = "Team proclamato con successo")
+    @ApiResponse(responseCode = "400", description = "Richiesta non valida o dati mancanti")
+    public ResponseEntity<String> declareWinner(@RequestBody @Valid String teamName) {
+        try{
+            hackathonService.declareWinner(teamName);
+            return ResponseEntity.ok("Richiesta proclamazione vincitore avvenuta con successo!");
+        } catch (Exception ex) {
+            return ResponseEntity.badRequest().body("Richiesta non valida!");
         }
     }
 }
