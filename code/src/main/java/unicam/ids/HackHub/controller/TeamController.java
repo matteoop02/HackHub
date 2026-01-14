@@ -1,69 +1,96 @@
 package unicam.ids.HackHub.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 import unicam.ids.HackHub.dto.requests.CreateTeamRequest;
-import unicam.ids.HackHub.exceptions.ResourceNotFoundException;
-import unicam.ids.HackHub.model.Hackathon;
-import unicam.ids.HackHub.model.User;
-import unicam.ids.HackHub.repository.HackathonRepository;
-import unicam.ids.HackHub.repository.UserRepository;
 import unicam.ids.HackHub.service.TeamService;
 
-import java.util.List;
 
 @RestController
-@RequestMapping("/utente")
+@RequestMapping("/api/team")
+@Tag(name = "Team", description = "Gestione dinamiche dei team")
 public class TeamController {
     @Autowired
     private TeamService teamService;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private HackathonRepository hackathonRepository;
 
-    @PostMapping("/createTeam")
+    @PostMapping("/utente/create")
     @Operation(
-            summary = "Creazione team",
-            description = "Permette a un utente registrato di creare un team",
-            requestBody = @RequestBody(
-                    description = "Team creato dall'utente",
-                    required = true,
-                    content = @Content(
-                            mediaType = "application/json",
-                            examples = @ExampleObject(
-                                    name = "Esempio creazione team",
-                                    value = """
-                                    {
-                                      "CreateTeamRequest": {
-                                        "username": "matteop",
-                                        "name": "Borlotti",
-                                        "hackathonName": "Scienza",
-                                        "submissionTitle": "Nuove Scoperte"                                 
-                                    }
-                                    """
-                            )
-                    )
-            )
+            summary = "Creazione nuovo team",
+            description = "Permette la registrazione di un nuovo team da parte di un Utente"
     )
-    @ApiResponse(responseCode = "200", description = "Team creato con successo")
-    @ApiResponse(responseCode = "401", description = "Team non creato, dati non validi")
-    public ResponseEntity<String> createTeam(@RequestBody CreateTeamRequest createTeamRequest) {
+    @ApiResponse(responseCode = "200", description = "Team registrato con successo")
+    @ApiResponse(responseCode = "400", description = "Team non creato")
+    public ResponseEntity<String> createTeam(Authentication authentication, @RequestBody @Valid CreateTeamRequest  createTeamRequest) {
         try {
-            teamService.createTeam(createTeamRequest);
+            teamService.createTeam(authentication, createTeamRequest);
             return ResponseEntity.ok("Team creato con successo");
         }
         catch(Exception ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());
         }
     }
+
+    @PostMapping("/utente/joinToTeam")
+    @Operation(
+            summary = "Aggiunge l'utente loggato al team se pubblico",
+            description = """
+        Un utente può unirsi a un team pubblico.
+    """
+    )
+    @ApiResponse(responseCode = "200", description = "Partecipazione avvenuta con successo")
+    @ApiResponse(responseCode = "400", description = "Errore nella richiesta o dati non validi")
+    public ResponseEntity<String> joinToTeam(Authentication authentication, @RequestParam @Valid String teamName) {
+        try {
+            teamService.joinToTeam(authentication, teamName);
+            return ResponseEntity.ok("Unione al team effettuata con successo");
+        }
+        catch(Exception ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
+
+    @PostMapping("/leaderDelTeam/remove")
+    @Operation(
+            summary = "Rimuovi membro dal team",
+            description = """
+        Rimuove un membro del team.
+    """
+    )
+    @ApiResponse(responseCode = "200", description = "Rimozione avvenuta con successo")
+    @ApiResponse(responseCode = "400", description = "Errore nella richiesta o dati non validi")
+    public ResponseEntity<String> removeMemberToTeam(Authentication authentication, @RequestParam @Valid String member) {
+        try {
+            teamService.deleteMemberToTeam(authentication, member);
+            return ResponseEntity.ok("Membro rimosso con successo");
+        }
+        catch(Exception ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
+
+    @PostMapping("/membroDelTeam/leaveTeam")
+    @Operation(
+            summary = "Rimuove l'utente loggato dal team",
+            description = """
+        Un utente può lasciare il team.
+    """
+    )
+    @ApiResponse(responseCode = "200", description = "Partecipazione avvenuta con successo")
+    @ApiResponse(responseCode = "400", description = "Errore nella richiesta o dati non validi")
+    public ResponseEntity<String> leaveTeam(Authentication authentication, @RequestParam @Valid String teamName) {
+        try {
+            teamService.leaveTeam(authentication, teamName);
+            return ResponseEntity.ok("Membro rimosso con successo");
+        }
+        catch(Exception ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
+
 }

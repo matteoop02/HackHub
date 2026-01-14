@@ -1,50 +1,39 @@
 package unicam.ids.HackHub.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import unicam.ids.HackHub.dto.ComplexDTO.HackathonSubmissionsEvaluationDTO;
-import unicam.ids.HackHub.dto.requests.CreateHackathonRequest;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+import unicam.ids.HackHub.dto.requests.CreateTeamSubmissionRequest;
+import unicam.ids.HackHub.dto.requests.HackathonSubmissionEvaluationRequest;
+import unicam.ids.HackHub.dto.requests.UpdateTeamSubmissionRequest;
 import unicam.ids.HackHub.model.Submission;
-import unicam.ids.HackHub.model.User;
-import unicam.ids.HackHub.repository.SubmissionRepository;
-import unicam.ids.HackHub.repository.UserRepository;
 import unicam.ids.HackHub.service.SubmissionService;
-import unicam.ids.HackHub.service.UserService;
-
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/submission")
+@Tag(name = "Sottomissioni", description = "Gestione delle sottomissioni")
 public class SubmissionController {
-    @Autowired
-    private SubmissionRepository submissionRepository;
+
     @Autowired
     private SubmissionService submissionService;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private UserService userService;
 
-
-    @PostMapping("/listByHackathon")
-    public ResponseEntity<List<Submission>> getSubmissionsListByHackathonName(@RequestBody String hackathonName) {
+    @PostMapping("/staff/listByHackathon")
+    public ResponseEntity<List<Submission>> getSubmissionsListByHackathonName(@RequestParam @Valid String hackathonName) {
         try {
-            List<Submission> submmissions = submissionService.getSubmissionsByHackathonName(hackathonName);
-            return ResponseEntity.ok(submmissions);
+            List<Submission> submissions = submissionService.getSubmissionsByHackathonName(hackathonName);
+            return ResponseEntity.ok(submissions);
         }
         catch (Exception ex) {
             return ResponseEntity.badRequest().build();
         }
     }
 
-    @PostMapping("/listByTeam")
-    public ResponseEntity<List<Submission>> getSubmissionsListByTeamName(@RequestBody String teamName) {
+    @PostMapping("/staff/listByTeam")
+    public ResponseEntity<List<Submission>> getSubmissionsListByTeamName(@RequestParam @Valid String teamName) {
         try {
             List<Submission> submissions = submissionService.getSubmissionsByTeamName(teamName);
             return ResponseEntity.ok(submissions);
@@ -54,10 +43,21 @@ public class SubmissionController {
         }
     }
 
-    @PostMapping("/update")
-    public ResponseEntity<String> updateSubmission(@RequestBody String title, String content, Date sendingDate, Date lastEdit) {
+    @PostMapping("/team/create")
+    public ResponseEntity<String> createSubmission(Authentication authentication, @RequestBody @Valid CreateTeamSubmissionRequest createTeamSubmissionRequest) {
         try {
-            submissionService.updateSubmission(title, content, sendingDate, lastEdit);
+            submissionService.createSubmission(authentication, createTeamSubmissionRequest);
+            return ResponseEntity.ok("Sottomissione creata");
+        }
+        catch(Exception ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
+
+    @PostMapping("/team/update")
+    public ResponseEntity<String> updateSubmission(@RequestBody @Valid UpdateTeamSubmissionRequest updateTeamSubmissionRequest) {
+        try {
+            submissionService.updateSubmission(updateTeamSubmissionRequest);
             return ResponseEntity.ok("Sottomissione modificata");
         }
         catch(Exception ex) {
@@ -65,10 +65,10 @@ public class SubmissionController {
         }
     }
 
-    @PostMapping("/evaluateHackathonSubmissions")
-    public ResponseEntity<String> evaluateHackathonSubmissions(@RequestBody HackathonSubmissionsEvaluationDTO hackathonSubmissionsEvaluationDTO) {
+    @PostMapping("/judge/evaluateHackathonSubmission")
+    public ResponseEntity<String> evaluateHackathonSubmission(@RequestBody HackathonSubmissionEvaluationRequest hackathonSubmissionEvaluationRequest) {
         try {
-            //submissionService.evaluateHackathonSubmissions(hackathonSubmissionsEvaluationDTO.getJudgeId(), hackathonSubmissionsEvaluationDTO.getHackathonId(), hackathonSubmissionsEvaluationDTO.getJudgements());
+            submissionService.evaluateHackathonSubmission(hackathonSubmissionEvaluationRequest);
             return ResponseEntity.ok("Valutazione completata");
         }
         catch(Exception ex) {

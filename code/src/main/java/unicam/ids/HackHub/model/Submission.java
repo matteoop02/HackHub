@@ -3,15 +3,16 @@ package unicam.ids.HackHub.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.*;
 import unicam.ids.HackHub.enums.SubmissionState;
-import java.util.Date;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "SUBMISSIONS")
 public class Submission {
@@ -28,12 +29,12 @@ public class Submission {
     private String content;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "SendingDate", nullable = false)
-    private Date sendingDate;
+    @JoinColumn(name = "SendingDate", nullable = false)
+    private LocalDateTime sendingDate;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "LastEdit")
-    private Date lastEdit;
+    private LocalDateTime lastEdit;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "State", nullable = false)

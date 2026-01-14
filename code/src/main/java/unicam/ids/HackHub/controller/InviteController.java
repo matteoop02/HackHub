@@ -1,100 +1,139 @@
 package unicam.ids.HackHub.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import unicam.ids.HackHub.dto.requests.InsideInviteRequest;
 import unicam.ids.HackHub.dto.requests.OutsideInviteRequest;
+import unicam.ids.HackHub.dto.requests.RegisterFromInviteRequest;
 import unicam.ids.HackHub.model.*;
-import unicam.ids.HackHub.service.InviteService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
 import jakarta.validation.Valid;
+import unicam.ids.HackHub.service.InviteService;
+
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/invites")
-@RequiredArgsConstructor
+@Tag(name = "Inviti", description = "Gestione degli inviti: Interni (da e verso i team) ed Esterni (per utenti invitati ad iscriversi alla piattaforma)")
 public class InviteController {
 
-    private final InviteService inviteService;
+    @Autowired
+    private InviteService inviteService;
 
-    @PostMapping("/outside")
-    public ResponseEntity<InviteOutsidePlatform> inviteOutsideUser(
-            @Valid @RequestBody OutsideInviteRequest request) {
+    //------------------------------- OUTSIDE INVITE MANAGE -------------------------------
 
-        InviteOutsidePlatform invite = inviteService.inviteOutsideUser(
-                request.getSenderUsername(),
-                request.getRecipientEmail(),
-                request.getMessage()
-        );
+    @PostMapping("/public/inviteOutsideUser")
+    public ResponseEntity<InviteOutsidePlatform> inviteOutsideUser(Authentication authentication, @Valid @RequestBody OutsideInviteRequest outsideInviteRequest) {
+        try{
+            InviteOutsidePlatform invite = inviteService.inviteOutsideUser(authentication, outsideInviteRequest);
 
+            return ResponseEntity.status(HttpStatus.CREATED).body(invite);
+
+        }catch (Exception ex){
+            return  ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PostMapping("/outside/acceptInviteAndRegisterUser")
+    public ResponseEntity<String> acceptInviteAndRegisterUser(@RequestBody @Valid RegisterFromInviteRequest request) {
+        try {
+            inviteService.acceptInviteAndRegisterUser(request);
+            return ResponseEntity.ok("Registrazione completata! Utente aggiunto alla piattaforma.");
+        } catch (Exception ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
+
+    @PostMapping("/outside/{token}/rejectOutsideInvite")
+    public ResponseEntity<String> rejectOutsideInvite(@PathVariable String token) {
+        try{
+            inviteService.rejectOutsideInvite(token);
+            return ResponseEntity.ok("Rifiuto dell'invito riuscito!");
+        } catch (Exception ex){
+            return ResponseEntity.badRequest().body("Rifiuto dell'invito fallito!" + ex.getMessage());
+        }
+    }
+
+    @PostMapping("/outside/{token}/cancelOutsideInvite")
+    public ResponseEntity<String> cancelOutsideInvite(@PathVariable String token) {
+        try{
+            inviteService.cancelOutsideInvite(token);
+            return ResponseEntity.ok("Cancellazione dell'invito riuscita!");
+        } catch (Exception ex){
+            return ResponseEntity.badRequest().body("Cancellazione dell'invito fallita!" + ex.getMessage());
+        }
+    }
+
+    //------------------------------- INSIDE INVITE MANAGE -------------------------------
+
+    @PostMapping("/leaderDelTeam/inviteToTeam")
+    public ResponseEntity<InviteInsidePlatform> inviteToTeam(@Valid @RequestBody InsideInviteRequest insideInviteRequest) {
+
+        InviteInsidePlatform invite = inviteService.inviteUserToTeam(insideInviteRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(invite);
     }
 
-    @PostMapping("/team")
-    public ResponseEntity<InviteInsidePlatform> inviteToTeam(
-            @Valid @RequestBody InsideInviteRequest request) {
-
-        InviteInsidePlatform invite = inviteService.inviteUserToTeam(
-                request.getSenderUsername(),
-                request.getRecipientUsername(),
-                request.getTeamName(),
-                request.getProposedRole(),
-                request.getMessage()
-        );
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(invite);
+    @PostMapping("/inviteManage/{inviteId}/acceptTeamInvite")
+    public ResponseEntity<String> acceptTeamInvite(Authentication authentication, @PathVariable Long inviteId) {
+        try {
+            inviteService.acceptTeamInvite(authentication, inviteId);
+            return ResponseEntity.ok("Invito accettato con successo!");
+        }
+        catch (Exception ex) {
+            return ResponseEntity.badRequest().body("Accettazione dell'invito fallita!\n" + ex.getMessage());
+        }
     }
 
-    @PostMapping("/outside/{token}/accept")
-    public ResponseEntity<Void> acceptOutsideInvite(@PathVariable String token) {
-        inviteService.acceptOutsideInvite(token);
-        return ResponseEntity.ok().build();
+    @PostMapping("/inviteManage/{inviteId}/rejectTeamInvite")
+    public ResponseEntity<String> rejectTeamInvite(Authentication authentication, @PathVariable Long inviteId) {
+        try {
+            inviteService.rejectTeamInvite(authentication, inviteId);
+            return ResponseEntity.ok("Invito accettato con successo!");
+        }
+        catch (Exception ex) {
+            return ResponseEntity.badRequest().body("Accettazione dell'invito fallita!\n" + ex.getMessage());
+        }
     }
 
-    @PostMapping("/team/{inviteId}/accept")
-    public ResponseEntity<Void> acceptTeamInvite(
-            @PathVariable Long inviteId,
-            @AuthenticationPrincipal String username) {
-
-        inviteService.acceptTeamInvite(inviteId, username);
-        return ResponseEntity.ok().build();
+    @DeleteMapping("/inviteManage/{inviteId}/cancelTeamInvite")
+    public ResponseEntity<String> cancelTeamInvite(Authentication authentication, @PathVariable Long inviteId) {
+        try {
+            inviteService.cancelTeamInvite(authentication, inviteId);
+            return ResponseEntity.ok("Invito accettato con successo!");
+        }
+        catch (Exception ex) {
+            return ResponseEntity.badRequest().body("Accettazione dell'invito fallita!\n" + ex.getMessage());
+        }
     }
 
-    @PostMapping("/team/{inviteId}/reject")
-    public ResponseEntity<Void> rejectInvite(
-            @PathVariable Long inviteId,
-            @AuthenticationPrincipal String username) {
+    //------------------------------- GET INVITE -------------------------------
 
-        inviteService.rejectInvite(inviteId, username);
-        return ResponseEntity.ok().build();
-    }
+    @GetMapping("/inviteManage/email")
+    public ResponseEntity<List<InviteInsidePlatform>> findPendingInvitesForEmails(Authentication authentication) {
 
-    @DeleteMapping("/team/{inviteId}")
-    public ResponseEntity<Void> cancelInvite(
-            @PathVariable Long inviteId,
-            @AuthenticationPrincipal String username) {
-
-        inviteService.cancelInvite(inviteId, username);
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/pending")
-    public ResponseEntity<List<InviteInsidePlatform>> getPendingInvites(
-            @AuthenticationPrincipal String username) {
-
-        List<InviteInsidePlatform> invites =
-                inviteService.getPendingInvitesForUser(username);
+        List<InviteInsidePlatform> invites = inviteService.findPendingInvitesForUser(authentication);
         return ResponseEntity.ok(invites);
     }
 
-    @GetMapping("/team/{teamName}")
-    public ResponseEntity<List<InviteInsidePlatform>> getTeamInvites(
-            @PathVariable String teamName) {
+    @GetMapping("/inviteManage/user")
+    public ResponseEntity<List<InviteInsidePlatform>> findAllPendingInvitesForUsers(Authentication authentication) {
 
-        List<InviteInsidePlatform> invites = inviteService.getTeamInvites(teamName);
+        List<InviteInsidePlatform> invites = inviteService.findPendingInvitesForUser(authentication);
+        return ResponseEntity.ok(invites);
+    }
+
+    @GetMapping("/inviteManage/team")
+    public ResponseEntity<List<InviteInsidePlatform>> findAllTeamInvites(Authentication authentication) {
+        List<InviteInsidePlatform> invites = inviteService.findTeamInvites(authentication);
+        return ResponseEntity.ok(invites);
+    }
+
+    @GetMapping("/inviteManage/{recipientEmail}/email")
+    public ResponseEntity<List<Invite>> findAllRecipientEmailInvites(@PathVariable String recipientEmail) {
+        List<Invite> invites = inviteService.findEmailInvites(recipientEmail);
         return ResponseEntity.ok(invites);
     }
 }

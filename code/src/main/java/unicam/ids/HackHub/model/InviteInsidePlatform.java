@@ -1,11 +1,11 @@
 package unicam.ids.HackHub.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import jakarta.persistence.*;
 import unicam.ids.HackHub.enums.InviteState;
 
 import java.time.LocalDateTime;
@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "team_invites", indexes = {
+@Table(name = "inside_invites", indexes = {
         @Index(name = "idx_recipient_user", columnList = "recipient_user_id"),
         @Index(name = "idx_team_id", columnList = "team_id"),
         @Index(name = "idx_status", columnList = "status")
@@ -26,23 +26,20 @@ public class InviteInsidePlatform implements Invite {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "sender_user_id", nullable = false)
-    private Long senderId;
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "senderUserId", nullable = false)
+    private User senderUser;
 
-    @Column(name = "sender_username", nullable = false)
-    private String senderUsername;
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "recipientUserId", nullable = false)
+    private User recipientUser;
 
-    @Column(name = "recipient_user_id", nullable = false)
-    private Long recipientUserId;
-
-    @Column(name = "recipient_username", nullable = false)
-    private String recipientUsername;
-
-    @Column(name = "team_id", nullable = false)
-    private Long teamId;
-
-    @Column(name = "team_name", nullable = false)
-    private String teamName;
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "teamId", nullable = false)
+    private Team team;
 
     @ManyToOne
     @JoinColumn(name = "RoleId", nullable = false)

@@ -1,24 +1,28 @@
 package unicam.ids.HackHub.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import unicam.ids.HackHub.dto.ComplexDTO.ViolationReportDTO;
-import unicam.ids.HackHub.service.UserService;
+import unicam.ids.HackHub.dto.requests.ReportRequest;
+import unicam.ids.HackHub.service.ReportService;
 
 @RestController
 @RequestMapping("/api/report")
+@Tag(name = "Report", description = "Gestione dei report (violazione, ecc...)")
 public class ReportController {
     @Autowired
-    private UserService userService;
+    private ReportService reportService;
 
-    @PostMapping("/request")
-    public ResponseEntity<String> violationReportRequest(@RequestBody ViolationReportDTO violationReportDTO) {
+    @PostMapping("/mentor/reportRequest")
+    public ResponseEntity<String> reportRequest(Authentication authentication, @RequestBody @Valid ReportRequest reportRequest) {
         try {
-            userService.violationReportRequest(violationReportDTO.getMentorId(), violationReportDTO.getDescription(), violationReportDTO.getTeamId(), violationReportDTO.getOrganizerId());
+            reportService.reportRequest(authentication, reportRequest);
             return ResponseEntity.ok("Segnalazione Effettuata");
         }
         catch(Exception ex) {

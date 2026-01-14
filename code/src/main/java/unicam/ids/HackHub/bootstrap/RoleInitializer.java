@@ -1,4 +1,4 @@
-package unicam.ids.HackHub.config;
+package unicam.ids.HackHub.bootstrap;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -12,20 +12,20 @@ public class RoleInitializer {
     @Bean
     CommandLineRunner initRoles(UserRoleRepository roleRepo) {
         return args -> {
-            createRoleIfNotFound(roleRepo, "UTENTE", "Utente base");
-            createRoleIfNotFound(roleRepo, "MEMBRO_DEL_TEAM", "Membro di un team");
-            createRoleIfNotFound(roleRepo, "LEADER_DEL_TEAM", "Leader di un team");
-            createRoleIfNotFound(roleRepo, "MENTORE", "Mentore di hackathon");
-            createRoleIfNotFound(roleRepo, "GIUDICE", "Giudice valutatore");
-            createRoleIfNotFound(roleRepo, "ORGANIZZATORE", "Organizzatore hackathon");
+            createRoleIfNotFound(roleRepo, 1L,"UTENTE");
+            createRoleIfNotFound(roleRepo, 2L,"MEMBRO_DEL_TEAM");
+            createRoleIfNotFound(roleRepo, 3L,"LEADER_DEL_TEAM");
+            createRoleIfNotFound(roleRepo, 4L,"MENTORE");
+            createRoleIfNotFound(roleRepo, 5L,"GIUDICE");
+            createRoleIfNotFound(roleRepo, 6L,"ORGANIZZATORE");
         };
     }
 
-    private void createRoleIfNotFound(UserRoleRepository repo, String name, String category) {
+    private void createRoleIfNotFound(UserRoleRepository repo, Long id, String name) {
         if (repo.findByName(name).isEmpty()) {
             UserRole role = new UserRole();
-            role.setName(name);       // es. "UTENTE"
-            role.setCategory(category); // **obbligatorio!**
+            role.setId(id);
+            role.setName(name);
             role.setIsActive(true);
             repo.save(role);
         }

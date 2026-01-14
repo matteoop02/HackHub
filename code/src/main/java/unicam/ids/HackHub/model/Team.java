@@ -2,10 +2,14 @@ package unicam.ids.HackHub.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -32,11 +36,14 @@ public class Team {
     private User teamLeader;
 
     @OneToMany(mappedBy = "team")
-    private List<User> members;
+    private List<User> members = new ArrayList<>();
 
     @ManyToMany
-    @JoinTable(name = "MENTORI", joinColumns = @JoinColumn(name = "TeamId"), inverseJoinColumns = @JoinColumn(name = "UserId"))
-    private List<User> mentors;
+    @JoinTable(name = "TEAM_MENTORS", joinColumns = @JoinColumn(name = "TeamId"), inverseJoinColumns = @JoinColumn(name = "UserId"))
+    private List<User> mentors = new ArrayList<>();
+
+    @Column(name = "isPublic", nullable = false)
+    private boolean isPublic;
 
     public void addMember(User user) {
         members.add(user);

@@ -5,7 +5,7 @@ import unicam.ids.HackHub.enums.InviteState;
 
 public interface Invite {
     Long getId();
-    Long getSenderId();
+    User getSenderUser();
     InviteState getStatus();
     LocalDateTime getCreatedAt();
     LocalDateTime getExpiresAt();

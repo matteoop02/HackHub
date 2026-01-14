@@ -1,65 +1,78 @@
 package unicam.ids.HackHub.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import unicam.ids.HackHub.enums.HackathonState;
-import java.util.Date;
-import java.util.List;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "HACKATHONS")
 public class Hackathon {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Id", nullable = false)
     private Long id;
 
-    @Column(name = "Name", nullable = false)
+    @Column(name = "Name", nullable = false, unique = true)
     private String name;
 
-    @Column(name = "Place", nullable = false)
+    @Column(name = "Place")
     private String place;
 
-    @Column(name = "Regulation", nullable = false)
+    @Column(name = "Regulation", length = 2000)
     private String regulation;
 
+    @Column(name = "SubscriptionDeadline")
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "SubscriptionDeadline", nullable = false)
-    private Date subscriptionDeadline;
+    private LocalDateTime subscriptionDeadline;
 
+    @Column(name = "StartDate")
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "StartDate", nullable = false)
-    private Date startDate;
+    private LocalDateTime startDate;
 
+    @Column(name = "EndDate")
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "EndDate", nullable = false)
-    private Date endDate;
+    private LocalDateTime endDate;
 
-    @Column(name = "Reward", nullable = false)
-    private double reward;
+    @Column(name = "Reward")
+    private Double reward;
 
-    @OneToMany(mappedBy = "hackathon")
-    private List<Team> teams;
+    @Column(name = "MaxTeamSize")
+    private Integer maxTeamSize;
 
-    @Column(name = "MaxTeamSize", nullable = false)
-    private int maxTeamSize;
-
-    @OneToOne
-    @JoinColumn(name = "WinnerId", referencedColumnName = "Id")
-    private Team winner;
+    @Column(name = "IsPublic")
+    private Boolean isPublic;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "State", nullable = false)
+    @Column(name = "State")
     private HackathonState state;
 
-    @Column(name = "IsPublic", nullable = false)
-    private boolean isPublic;
+    @ManyToOne
+    @JoinColumn(name = "Organizer_Id", nullable = false)
+    private User organizer;
+
+    @ManyToOne
+    @JoinColumn(name = "JudgeId")
+    private User judge;
+
+    @ManyToOne
+    @JoinColumn(name = "TeamWinner_Id")
+    private Team teamWinner;
+
+    @ManyToMany
+    @JoinTable(name = "HACKATHON_MENTORS",
+            joinColumns = @JoinColumn(name = "HackathonId"),
+            inverseJoinColumns = @JoinColumn(name = "UserId"))
+    private Set<User> mentors = new HashSet<>();
+
+    @OneToMany(mappedBy = "hackathon", cascade = CascadeType.ALL)
+    private Set<Team> teams = new HashSet<>();
 }

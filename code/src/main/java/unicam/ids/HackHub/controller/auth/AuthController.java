@@ -6,8 +6,8 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import unicam.ids.HackHub.dto.requests.LoginUserRequest;
-import unicam.ids.HackHub.dto.requests.RegisterUserRequest;
+import unicam.ids.HackHub.dto.requests.auth.LoginUserRequest;
+import unicam.ids.HackHub.dto.requests.auth.RegisterUserRequest;
 import unicam.ids.HackHub.dto.responses.AuthResponse;
 import unicam.ids.HackHub.service.auth.AuthService;
 import jakarta.validation.Valid;
@@ -91,8 +91,6 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@RequestBody @Valid LoginUserRequest loginRequest) {
         // Chiama il service che gestisce autenticazione e generazione del token
         AuthResponse response = authService.login(loginRequest);
-
-        // Restituisce il token con status 200 OK
         return ResponseEntity.ok(response);
     }
 }
