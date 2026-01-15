@@ -4,7 +4,7 @@ import org.springframework.security.core.Authentication;
 import unicam.ids.HackHub.dto.requests.InsideInviteRequest;
 import unicam.ids.HackHub.dto.requests.OutsideInviteRequest;
 import unicam.ids.HackHub.dto.requests.RegisterFromInviteRequest;
-import unicam.ids.HackHub.enums.InviteState;
+import unicam.ids.HackHub.enums.InviteStatus;
 import unicam.ids.HackHub.exceptions.ResourceNotFoundException;
 import unicam.ids.HackHub.model.*;
 import unicam.ids.HackHub.factory.InviteFactory;
@@ -14,8 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import unicam.ids.HackHub.enums.InviteState;
-import unicam.ids.HackHub.repository.UserRoleRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +37,7 @@ public class InviteService {
         if(existsBySenderUsernameAndRecipientEmailAndStatus(
                 userService.findUserByUsername(authentication.getName()),
                 outsideInviteRequest.recipientEmail(),
-                InviteState.PENDING))
+                InviteStatus.PENDING))
             throw new IllegalStateException("Esiste già un invito pendente per " + outsideInviteRequest.recipientEmail() + "da parte di " + authentication.getName());
 
         User senderUser = userService.findUserByUsername(authentication.getName());
@@ -70,7 +68,7 @@ public class InviteService {
         if (invite.isExpired())
             throw new IllegalStateException("L'invito è scaduto");
 
-        if (invite.getStatus() != InviteState.PENDING)
+        if (invite.getStatus() != InviteStatus.PENDING)
             throw new IllegalStateException("Invito non più valido");
 
         //Crea utente sulla piattaforma
@@ -113,7 +111,7 @@ public class InviteService {
         User recipientUser = userService.findUserByUsername(insideInviteRequest.recipientUsername());
 
         // Verifica che non ci sia già un invito pendente per un dato utente da un dato team
-        if (existsByRecipientUserAndTeamAndStatus(recipientUser, senderUser.getTeam(), InviteState.PENDING))
+        if (existsByRecipientUserAndTeamAndStatus(recipientUser, senderUser.getTeam(), InviteStatus.PENDING))
             throw new IllegalStateException("Esiste già un invito pendente per questo utente");
 
         //Carico il ruolo
@@ -171,23 +169,23 @@ public class InviteService {
 
     @Transactional(readOnly = true)
     public List<InviteInsidePlatform> findPendingInvitesForUser(Authentication authentication) {
-        return insideInviteRepository.findByRecipientUserAndStatus(userService.findUserByUsername(authentication.getName()), InviteState.PENDING);
+        return insideInviteRepository.findByRecipientUserAndStatus(userService.findUserByUsername(authentication.getName()), InviteStatus.PENDING);
     }
 
     @Transactional(readOnly = true)
     public List<InviteInsidePlatform> findTeamInvites(Authentication authentication) {
         Team team = teamService.findByName(userService.findUserByUsername(authentication.getName()).getTeam().getName());
-        return insideInviteRepository.findByTeamAndStatus(team, InviteState.PENDING);
+        return insideInviteRepository.findByTeamAndStatus(team, InviteStatus.PENDING);
     }
 
     public List<Invite> findEmailInvites(String email) {
         // inside invites
         List<InviteInsidePlatform> inside = insideInviteRepository
-                .findByRecipientUserAndStatus(userService.findUserByEmail(email), InviteState.PENDING);
+                .findByRecipientUserAndStatus(userService.findUserByEmail(email), InviteStatus.PENDING);
 
         // outside invites
         List<InviteOutsidePlatform> outside = outsideInviteRepository
-                .findByRecipientEmailAndStatus(email, InviteState.PENDING);
+                .findByRecipientEmailAndStatus(email, InviteStatus.PENDING);
 
         List<Invite> allInvites = new ArrayList<>();
         allInvites.addAll(inside);
@@ -211,12 +209,12 @@ public class InviteService {
     }
 
     @Transactional
-    public boolean existsByRecipientUserAndTeamAndStatus(User recipientUser, Team team, InviteState inviteState) {
-        return insideInviteRepository.existsByRecipientUserAndTeamAndStatus(recipientUser, team, inviteState);
+    public boolean existsByRecipientUserAndTeamAndStatus(User recipientUser, Team team, InviteStatus inviteStatus) {
+        return insideInviteRepository.existsByRecipientUserAndTeamAndStatus(recipientUser, team, inviteStatus);
     }
 
     @Transactional
-    public boolean existsBySenderUsernameAndRecipientEmailAndStatus(User senderUser, String recipientEmail, InviteState inviteState) {
-        return outsideInviteRepository.existsBySenderUserAndRecipientEmailAndStatus(senderUser, recipientEmail, inviteState);
+    public boolean existsBySenderUsernameAndRecipientEmailAndStatus(User senderUser, String recipientEmail, InviteStatus inviteStatus) {
+        return outsideInviteRepository.existsBySenderUserAndRecipientEmailAndStatus(senderUser, recipientEmail, inviteStatus);
     }
 }

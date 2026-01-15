@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 import unicam.ids.HackHub.service.InviteService;
-
 import java.util.List;
 
 @RestController
@@ -47,8 +46,8 @@ public class InviteController {
         }
     }
 
-    @PostMapping("/outside/{token}/rejectOutsideInvite")
-    public ResponseEntity<String> rejectOutsideInvite(@PathVariable String token) {
+    @PostMapping("/outside/rejectOutsideInvite")
+    public ResponseEntity<String> rejectOutsideInvite(@RequestParam String token) {
         try{
             inviteService.rejectOutsideInvite(token);
             return ResponseEntity.ok("Rifiuto dell'invito riuscito!");
@@ -57,8 +56,8 @@ public class InviteController {
         }
     }
 
-    @PostMapping("/outside/{token}/cancelOutsideInvite")
-    public ResponseEntity<String> cancelOutsideInvite(@PathVariable String token) {
+    @DeleteMapping("/outside/cancelOutsideInvite")
+    public ResponseEntity<String> cancelOutsideInvite(@RequestParam String token) {
         try{
             inviteService.cancelOutsideInvite(token);
             return ResponseEntity.ok("Cancellazione dell'invito riuscita!");
@@ -76,8 +75,8 @@ public class InviteController {
         return ResponseEntity.status(HttpStatus.CREATED).body(invite);
     }
 
-    @PostMapping("/inviteManage/{inviteId}/acceptTeamInvite")
-    public ResponseEntity<String> acceptTeamInvite(Authentication authentication, @PathVariable Long inviteId) {
+    @PostMapping("/inviteManage/acceptTeamInvite")
+    public ResponseEntity<String> acceptTeamInvite(Authentication authentication, @RequestParam Long inviteId) {
         try {
             inviteService.acceptTeamInvite(authentication, inviteId);
             return ResponseEntity.ok("Invito accettato con successo!");
@@ -87,8 +86,8 @@ public class InviteController {
         }
     }
 
-    @PostMapping("/inviteManage/{inviteId}/rejectTeamInvite")
-    public ResponseEntity<String> rejectTeamInvite(Authentication authentication, @PathVariable Long inviteId) {
+    @PostMapping("/inviteManage/rejectTeamInvite")
+    public ResponseEntity<String> rejectTeamInvite(Authentication authentication, @RequestParam Long inviteId) {
         try {
             inviteService.rejectTeamInvite(authentication, inviteId);
             return ResponseEntity.ok("Invito accettato con successo!");
@@ -98,8 +97,8 @@ public class InviteController {
         }
     }
 
-    @DeleteMapping("/inviteManage/{inviteId}/cancelTeamInvite")
-    public ResponseEntity<String> cancelTeamInvite(Authentication authentication, @PathVariable Long inviteId) {
+    @DeleteMapping("/inviteManage/cancelTeamInvite")
+    public ResponseEntity<String> cancelTeamInvite(Authentication authentication, @RequestParam Long inviteId) {
         try {
             inviteService.cancelTeamInvite(authentication, inviteId);
             return ResponseEntity.ok("Invito accettato con successo!");
@@ -111,7 +110,7 @@ public class InviteController {
 
     //------------------------------- GET INVITE -------------------------------
 
-    @GetMapping("/inviteManage/email")
+    @GetMapping("/inviteManage/senderEmail")
     public ResponseEntity<List<InviteInsidePlatform>> findPendingInvitesForEmails(Authentication authentication) {
 
         List<InviteInsidePlatform> invites = inviteService.findPendingInvitesForUser(authentication);
@@ -131,8 +130,8 @@ public class InviteController {
         return ResponseEntity.ok(invites);
     }
 
-    @GetMapping("/inviteManage/{recipientEmail}/email")
-    public ResponseEntity<List<Invite>> findAllRecipientEmailInvites(@PathVariable String recipientEmail) {
+    @GetMapping("/inviteManage/recipientEmail")
+    public ResponseEntity<List<Invite>> findAllRecipientEmailInvites(@RequestParam String recipientEmail) {
         List<Invite> invites = inviteService.findEmailInvites(recipientEmail);
         return ResponseEntity.ok(invites);
     }

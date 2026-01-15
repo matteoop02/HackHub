@@ -1,6 +1,6 @@
 package unicam.ids.HackHub.repository;
 
-import unicam.ids.HackHub.enums.InviteState;
+import unicam.ids.HackHub.enums.InviteStatus;
 import unicam.ids.HackHub.model.InviteOutsidePlatform;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,13 +19,13 @@ public interface OutsideInviteRepository extends JpaRepository<InviteOutsidePlat
 
     @Query("SELECT i FROM InviteOutsidePlatform i WHERE i.status = :status AND i.expiresAt < :dateTime")
     List<InviteOutsidePlatform> findExpiredInvites(
-            @Param("status") InviteState status,
+            @Param("status") InviteStatus status,
             @Param("dateTime") LocalDateTime dateTime
     );
 
-    boolean existsByRecipientEmailAndStatus(String email, InviteState status);
+    boolean existsByRecipientEmailAndStatus(String email, InviteStatus status);
 
-    boolean existsBySenderUserAndRecipientEmailAndStatus(User senderUser, String recipientEmail, InviteState status);
+    boolean existsBySenderUserAndRecipientEmailAndStatus(User senderUser, String recipientEmail, InviteStatus status);
 
-    List<InviteOutsidePlatform> findByRecipientEmailAndStatus(String email, InviteState inviteState);
+    List<InviteOutsidePlatform> findByRecipientEmailAndStatus(String email, InviteStatus inviteStatus);
 }

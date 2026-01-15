@@ -1,6 +1,6 @@
 package unicam.ids.HackHub.scheduler;
 
-import unicam.ids.HackHub.enums.InviteState;
+import unicam.ids.HackHub.enums.InviteStatus;
 import unicam.ids.HackHub.repository.OutsideInviteRepository;
 import unicam.ids.HackHub.repository.InsideInviteRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,15 +27,15 @@ public class InviteCleanupScheduler {
         LocalDateTime now = LocalDateTime.now();
 
         var expiredOutside = outsideInviteRepository
-                .findExpiredInvites(InviteState.PENDING, now);
+                .findExpiredInvites(InviteStatus.PENDING, now);
 
-        expiredOutside.forEach(invite -> invite.setStatus(InviteState.EXPIRED));
+        expiredOutside.forEach(invite -> invite.setStatus(InviteStatus.EXPIRED));
         outsideInviteRepository.saveAll(expiredOutside);
 
         var expiredTeam = insideInviteRepository
-                .findExpiredInvites(InviteState.PENDING, now);
+                .findExpiredInvites(InviteStatus.PENDING, now);
 
-        expiredTeam.forEach(invite -> invite.setStatus(InviteState.EXPIRED));
+        expiredTeam.forEach(invite -> invite.setStatus(InviteStatus.EXPIRED));
         insideInviteRepository.saveAll(expiredTeam);
 
         log.info("Pulizia completata - Esterni: {}, Team: {}",

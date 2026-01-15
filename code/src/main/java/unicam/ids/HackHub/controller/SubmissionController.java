@@ -21,7 +21,7 @@ public class SubmissionController {
     @Autowired
     private SubmissionService submissionService;
 
-    @PostMapping("/staff/listByHackathon")
+    @GetMapping("/staff/listByHackathon")
     public ResponseEntity<List<Submission>> getSubmissionsListByHackathonName(@RequestParam @Valid String hackathonName) {
         try {
             List<Submission> submissions = submissionService.getSubmissionsByHackathonName(hackathonName);
@@ -32,7 +32,7 @@ public class SubmissionController {
         }
     }
 
-    @PostMapping("/staff/listByTeam")
+    @GetMapping("/staff/listByTeam")
     public ResponseEntity<List<Submission>> getSubmissionsListByTeamName(@RequestParam @Valid String teamName) {
         try {
             List<Submission> submissions = submissionService.getSubmissionsByTeamName(teamName);

@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import unicam.ids.HackHub.dto.requests.CreateHackathonRequest;
 import unicam.ids.HackHub.dto.requests.SignTeamRequest;
 import unicam.ids.HackHub.dto.requests.UpdateHackathonStartDateRequest;
-import unicam.ids.HackHub.enums.HackathonState;
+import unicam.ids.HackHub.enums.HackathonStatus;
 import unicam.ids.HackHub.exceptions.*;
 import unicam.ids.HackHub.model.Hackathon;
 import unicam.ids.HackHub.model.Submission;
@@ -68,7 +68,7 @@ public class HackathonService {
                 .reward(request.reward())
                 .maxTeamSize(request.maxTeamSize())
                 .isPublic(request.isPublic())
-                .state(HackathonState.IN_ISCRIZIONE)
+                .state(HackathonStatus.IN_ISCRIZIONE)
                 .organizer(organizer)
                 .build();
 
@@ -112,7 +112,7 @@ public class HackathonService {
 
     private void validateTeamForSignUp(Team team, Hackathon hackathon) {
 
-        if (hackathon.getState() != HackathonState.IN_ISCRIZIONE)
+        if (hackathon.getState() != HackathonStatus.IN_ISCRIZIONE)
             throw new HackathonClosedException("Hackathon non aperto alle iscrizioni");
 
         if (team.getHackathon() != null)
@@ -205,7 +205,7 @@ public class HackathonService {
         Team team = teamService.findByName(teamName);
         Hackathon hackathon = findHackathonByName(team.getHackathon().getName());
 
-        if (hackathon.getState() != HackathonState.CONCLUSO)
+        if (hackathon.getState() != HackathonStatus.CONCLUSO)
             throw new IllegalArgumentException("Hackathon non concluso, impossibile proclamare il vincitore!");
 
         hackathon.setTeamWinner(team);

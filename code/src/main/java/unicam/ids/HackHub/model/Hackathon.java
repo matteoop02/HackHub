@@ -2,7 +2,7 @@ package unicam.ids.HackHub.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import unicam.ids.HackHub.enums.HackathonState;
+import unicam.ids.HackHub.enums.HackathonStatus;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -53,7 +53,7 @@ public class Hackathon {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "State")
-    private HackathonState state;
+    private HackathonStatus state;
 
     @ManyToOne
     @JoinColumn(name = "Organizer_Id", nullable = false)
