@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import jakarta.persistence.*;
-import unicam.ids.HackHub.enums.InviteState;
+import unicam.ids.HackHub.enums.InviteStatus;
 
 import java.time.LocalDateTime;
 
@@ -37,7 +37,7 @@ public class InviteOutsidePlatform implements Invite {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private InviteState status;
+    private InviteStatus status;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -50,7 +50,7 @@ public class InviteOutsidePlatform implements Invite {
 
     @Override
     public void send() {
-        if (this.status != InviteState.PENDING) {
+        if (this.status != InviteStatus.PENDING) {
             throw new IllegalStateException("L'invito può essere inviato solo se è in stato PENDING");
         }
     }
@@ -60,31 +60,31 @@ public class InviteOutsidePlatform implements Invite {
         if (isExpired()) {
             throw new IllegalStateException("L'invito è scaduto");
         }
-        if (this.status != InviteState.PENDING) {
+        if (this.status != InviteStatus.PENDING) {
             throw new IllegalStateException("Solo gli inviti PENDING possono essere accettati");
         }
-        this.status = InviteState.ACCEPTED;
+        this.status = InviteStatus.ACCEPTED;
     }
 
     @Override
     public void reject() {
-        if (this.status != InviteState.PENDING) {
+        if (this.status != InviteStatus.PENDING) {
             throw new IllegalStateException("Solo gli inviti PENDING possono essere rifiutati");
         }
-        this.status = InviteState.REJECTED;
+        this.status = InviteStatus.REJECTED;
     }
 
     @Override
     public void cancel() {
-        if (this.status != InviteState.PENDING) {
+        if (this.status != InviteStatus.PENDING) {
             throw new IllegalStateException("Solo gli inviti PENDING possono essere cancellati");
         }
-        this.status = InviteState.CANCELLED;
+        this.status = InviteStatus.CANCELLED;
     }
 
     @Override
     public boolean isExpired() {
-        return LocalDateTime.now().isAfter(expiresAt) && status == InviteState.PENDING;
+        return LocalDateTime.now().isAfter(expiresAt) && status == InviteStatus.PENDING;
     }
 
     @PrePersist

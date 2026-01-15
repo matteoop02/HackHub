@@ -1,6 +1,6 @@
 package unicam.ids.HackHub.enums;
 
-public enum SubmissionState {
+public enum SubmissionStatus {
     INVIATA,
     AGGIORNATA,
     VALUTATA

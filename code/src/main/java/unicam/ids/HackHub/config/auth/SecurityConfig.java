@@ -84,6 +84,12 @@ public class SecurityConfig {
                         //REPORT - OK
                         .requestMatchers("/api/report/mentor/**").hasRole("MENTORE")
 
+                        //CALLS - OK
+                        .requestMatchers("/api/calls/staff/**").hasAnyRole("MENTORE", "GIUDICE", "ORGANIZZATORE")
+                        .requestMatchers("/api/calls/team/**").hasAnyRole("MEMBRO_DEL_TEAM", "LEADER_DEL_TEAM")
+                        .requestMatchers("/api/calls/leaderDelTeam/**").hasRole("LEADER_DEL_TEAM")
+
+
                         // Anything else requires authentication
                         .anyRequest().authenticated()
                 )

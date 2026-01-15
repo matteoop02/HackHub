@@ -1,6 +1,6 @@
 package unicam.ids.HackHub.factory;
 
-import unicam.ids.HackHub.enums.InviteState;
+import unicam.ids.HackHub.enums.InviteStatus;
 import unicam.ids.HackHub.model.InviteInsidePlatform;
 import unicam.ids.HackHub.model.InviteOutsidePlatform;
 import org.springframework.stereotype.Component;
@@ -25,7 +25,7 @@ public class InviteFactory {
                 .senderUser(senderUser)
                 .recipientEmail(recipientEmail)
                 .inviteToken(generateToken())
-                .status(InviteState.PENDING)
+                .status(InviteStatus.PENDING)
                 .createdAt(LocalDateTime.now())
                 .expiresAt(LocalDateTime.now().plusDays(OUTSIDE_INVITE_EXPIRY_DAYS))
                 .message(message)
@@ -39,7 +39,7 @@ public class InviteFactory {
                 .recipientUser(recipientUser)
                 .team(senderUser.getTeam())
                 .proposedRole(proposedRole)
-                .status(InviteState.PENDING)
+                .status(InviteStatus.PENDING)
                 .createdAt(LocalDateTime.now())
                 .expiresAt(LocalDateTime.now().plusDays(TEAM_INVITE_EXPIRY_DAYS))
                 .message(message)

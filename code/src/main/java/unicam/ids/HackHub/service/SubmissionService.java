@@ -7,8 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 import unicam.ids.HackHub.dto.requests.CreateTeamSubmissionRequest;
 import unicam.ids.HackHub.dto.requests.HackathonSubmissionEvaluationRequest;
 import unicam.ids.HackHub.dto.requests.UpdateTeamSubmissionRequest;
-import unicam.ids.HackHub.enums.HackathonState;
-import unicam.ids.HackHub.enums.SubmissionState;
+import unicam.ids.HackHub.enums.HackathonStatus;
+import unicam.ids.HackHub.enums.SubmissionStatus;
 import unicam.ids.HackHub.exceptions.ResourceNotFoundException;
 import unicam.ids.HackHub.model.Hackathon;
 import unicam.ids.HackHub.model.Submission;
@@ -40,7 +40,7 @@ public class SubmissionService {
     }
 
     @Transactional(readOnly = true)
-    public Submission getSubmissionsByTeamNameAndHackathonNameAndStateIsNot(String name, String hackathonName, SubmissionState state) {
+    public Submission getSubmissionsByTeamNameAndHackathonNameAndStateIsNot(String name, String hackathonName, SubmissionStatus state) {
         return submissionRepository.findByTeamNameAndHackathonNameAndStateIsNot(name, hackathonName, state)
                 .orElseThrow(() -> new ResourceNotFoundException("Submission not found"));
     }
@@ -54,14 +54,14 @@ public class SubmissionService {
         Hackathon hackathon = hackathonService.findHackathonByName(request.hackathonName());
         Team team = teamService.findByName(request.teamName());
 
-        if(hackathon.getState().equals(HackathonState.IN_VALUTAZIONE))
+        if(hackathon.getState().equals(HackathonStatus.IN_VALUTAZIONE))
             throw new IllegalArgumentException("Hackathon non in valutazione");
 
-        Submission submission = getSubmissionsByTeamNameAndHackathonNameAndStateIsNot(team.getName(), hackathon.getName(), SubmissionState.VALUTATA);
+        Submission submission = getSubmissionsByTeamNameAndHackathonNameAndStateIsNot(team.getName(), hackathon.getName(), SubmissionStatus.VALUTATA);
 
         submission.setScore(request.score());
         submission.setComment(request.comment());
-        submission.setState(SubmissionState.VALUTATA);
+        submission.setState(SubmissionStatus.VALUTATA);
         submissionRepository.save(submission);
     }
 
@@ -74,7 +74,7 @@ public class SubmissionService {
             throw new IllegalArgumentException("Sottomissione già esistente per " + team.getName() + "e " + team.getHackathon().getName());
 
         //Se hackathon non in iscrizione non posso creare la sottomissione
-        if (!team.getHackathon().getState().equals(HackathonState.IN_ISCRIZIONE))
+        if (!team.getHackathon().getState().equals(HackathonStatus.IN_ISCRIZIONE))
             throw new IllegalArgumentException("Hackathon non in iscrizione");
 
         Submission submission = Submission.builder()
@@ -82,7 +82,7 @@ public class SubmissionService {
                 .content(request.content())
                 .sendingDate(LocalDateTime.now())
                 .lastEdit(LocalDateTime.now())
-                .state(SubmissionState.INVIATA)
+                .state(SubmissionStatus.INVIATA)
                 .team(team)
                 .hackathon(team.getHackathon())
                 .build();
@@ -96,7 +96,7 @@ public class SubmissionService {
         Team team = teamService.findByName(user.getTeam().getName());
 
         //Cerco la Submission attuale ovvero quella che appartiene all'hackathon attuale
-        Submission submission = getSubmissionsByTeamNameAndHackathonNameAndStateIsNot(team.getName(), team.getHackathon().getName(), SubmissionState.VALUTATA);
+        Submission submission = getSubmissionsByTeamNameAndHackathonNameAndStateIsNot(team.getName(), team.getHackathon().getName(), SubmissionStatus.VALUTATA);
 
         submission.setTitle(request.title());   //Aggiorno il titolo
         submission.setContent(request.content());   //Aggiorno il contenuto

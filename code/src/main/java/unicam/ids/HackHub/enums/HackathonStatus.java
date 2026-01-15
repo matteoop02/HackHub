@@ -1,6 +1,6 @@
 package unicam.ids.HackHub.enums;
 
-public enum HackathonState {
+public enum HackathonStatus {
 
     IN_ISCRIZIONE,
     IN_CORSO,

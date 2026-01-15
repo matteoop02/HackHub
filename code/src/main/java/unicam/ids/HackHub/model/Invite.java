@@ -1,12 +1,12 @@
 package unicam.ids.HackHub.model;
 
 import java.time.LocalDateTime;
-import unicam.ids.HackHub.enums.InviteState;
+import unicam.ids.HackHub.enums.InviteStatus;
 
 public interface Invite {
     Long getId();
     User getSenderUser();
-    InviteState getStatus();
+    InviteStatus getStatus();
     LocalDateTime getCreatedAt();
     LocalDateTime getExpiresAt();
 

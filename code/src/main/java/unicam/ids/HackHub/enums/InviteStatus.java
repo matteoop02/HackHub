@@ -1,6 +1,6 @@
 package unicam.ids.HackHub.enums;
 
-public enum InviteState {
+public enum InviteStatus {
     PENDING,
     ACCEPTED,
     REJECTED,
