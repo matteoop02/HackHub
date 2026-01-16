@@ -1,5 +1,6 @@
 package unicam.ids.HackHub.service;
 
+import org.h2.engine.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
@@ -18,6 +19,7 @@ import unicam.ids.HackHub.repository.HackathonRepository;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -40,6 +42,20 @@ public class HackathonService {
     @Transactional(readOnly = true)
     public List<Hackathon> getHackathons() {
         return hackathonRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Hackathon> getHackathonsByUser(User user) {
+        List<Hackathon> hackathons = new ArrayList<>();
+
+        if (user.getRole().getId() == 6L)
+            hackathons = hackathonRepository.findHackathonByOrganizer(user);
+        else if (user.getRole().getId() == 5L)
+            hackathons = hackathonRepository.findHackathonByJudge(user);
+        else if(user.getRole().getId() == 4L)
+            hackathons = hackathonRepository.findHackathonByMentors(user);
+
+        return hackathons;
     }
 
     @Transactional(readOnly = true)

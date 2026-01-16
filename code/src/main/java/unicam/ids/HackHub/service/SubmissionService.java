@@ -104,4 +104,19 @@ public class SubmissionService {
 
         submissionRepository.save(submission);
     }
+
+    public List<Submission> getSubmissionsByStaffMember(String staffUsername) {
+        User staff = userService.findUserByUsername(staffUsername);
+        List<Hackathon> hackathons = hackathonService.getHackathonsByUser(staff);
+
+        List<Submission> submissions = new ArrayList<>();
+
+        if (!hackathons.isEmpty()) {
+            for (int i = 0; i < (hackathons.size() - 1); i++) {
+                submissions.addAll(getSubmissionsByHackathonName(hackathons.get(i).getName()));
+            }
+        }
+
+        return submissions;
+    }
 }

@@ -21,6 +21,17 @@ public class SubmissionController {
     @Autowired
     private SubmissionService submissionService;
 
+    @GetMapping("/staff/listByStaffMember")
+    public ResponseEntity<List<Submission>> getSubmissionsListByHackathonName(Authentication authentication) {
+        try {
+            List<Submission> submissions = submissionService.getSubmissionsByStaffMember(authentication.getName());
+            return ResponseEntity.ok(submissions);
+        }
+        catch (Exception ex) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     @GetMapping("/staff/listByHackathon")
     public ResponseEntity<List<Submission>> getSubmissionsListByHackathonName(@RequestParam @Valid String hackathonName) {
         try {
