@@ -112,7 +112,7 @@ public class SubmissionService {
         List<Submission> submissions = new ArrayList<>();
 
         if (!hackathons.isEmpty()) {
-            for (int i = 0; i < (hackathons.size() - 1); i++) {
+            for (int i = 0; i < (hackathons.size()); i++) {
                 submissions.addAll(getSubmissionsByHackathonName(hackathons.get(i).getName()));
             }
         }
