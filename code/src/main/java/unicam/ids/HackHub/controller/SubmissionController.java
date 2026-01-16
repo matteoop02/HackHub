@@ -86,4 +86,15 @@ public class SubmissionController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @GetMapping("/staff/assigned")
+public ResponseEntity<List<Submission>> getAssignedSubmissions(Authentication authentication) {
+    try {
+        return ResponseEntity.ok(
+            submissionService.getSubmissionsByStaffMember(authentication.getName())
+        );
+    } catch (Exception ex) {
+        return ResponseEntity.badRequest().build();
+    }
+}
 }
