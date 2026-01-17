@@ -54,8 +54,8 @@ public class SubmissionService {
         Hackathon hackathon = hackathonService.findHackathonByName(request.hackathonName());
         Team team = teamService.findByName(request.teamName());
 
-        if(hackathon.getState().equals(HackathonStatus.IN_VALUTAZIONE))
-            throw new IllegalArgumentException("Hackathon non in valutazione");
+          if (!hackathon.getState().equals(HackathonStatus.IN_VALUTAZIONE))
+        throw new IllegalArgumentException("Hackathon non in valutazione");
 
         Submission submission = getSubmissionsByTeamNameAndHackathonNameAndStateIsNot(team.getName(), hackathon.getName(), SubmissionStatus.VALUTATA);
 
