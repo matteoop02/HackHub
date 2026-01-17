@@ -95,6 +95,9 @@ public class SubmissionService {
         User user = userService.findUserByUsername(request.authentication().getName());
         Team team = teamService.findByName(user.getTeam().getName());
 
+        if (LocalDateTime.now().isAfter(team.getHackathon().getSubscriptionDeadline()))
+        throw new IllegalArgumentException("Scadenza sottomissione superata");
+
         //Cerco la Submission attuale ovvero quella che appartiene all'hackathon attuale
         Submission submission = getSubmissionsByTeamNameAndHackathonNameAndStateIsNot(team.getName(), team.getHackathon().getName(), SubmissionStatus.VALUTATA);
 
