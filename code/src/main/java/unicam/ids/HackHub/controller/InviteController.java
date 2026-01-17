@@ -57,14 +57,14 @@ public class InviteController {
     }
 
     @DeleteMapping("/outside/cancelOutsideInvite")
-    public ResponseEntity<String> cancelOutsideInvite(@RequestParam String token) {
-        try{
-            inviteService.cancelOutsideInvite(token);
-            return ResponseEntity.ok("Cancellazione dell'invito riuscita!");
-        } catch (Exception ex){
-            return ResponseEntity.badRequest().body("Cancellazione dell'invito fallita!" + ex.getMessage());
-        }
+public ResponseEntity<String> cancelOutsideInvite(Authentication authentication, @RequestParam String token) {
+    try{
+        inviteService.cancelOutsideInvite(authentication, token);
+        return ResponseEntity.ok("Cancellazione dell'invito riuscita!");
+    } catch (Exception ex){
+        return ResponseEntity.badRequest().body("Cancellazione dell'invito fallita!" + ex.getMessage());
     }
+}
 
     //------------------------------- INSIDE INVITE MANAGE -------------------------------
 
