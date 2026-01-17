@@ -94,13 +94,19 @@ public class InviteService {
         outsideInviteRepository.save(invite);
     }
 
-    @Transactional
-    public void cancelOutsideInvite(String token) {
-        InviteOutsidePlatform invite = findInviteByToken(token);
+   @Transactional
+public void cancelOutsideInvite(Authentication authentication, String token) {
+    InviteOutsidePlatform invite = findInviteByToken(token);
 
-        invite.cancel();
-        outsideInviteRepository.save(invite);
+    // SOLO il mittente può cancellare
+    if (!invite.getSenderUser().getUsername().equals(authentication.getName())) {
+        throw new IllegalArgumentException("Non sei autorizzato a cancellare questo invito");
     }
+
+    invite.cancel();
+    outsideInviteRepository.save(invite);
+}
+
 
     //------------------------------- INSIDE INVITE MANAGE -------------------------------
 
