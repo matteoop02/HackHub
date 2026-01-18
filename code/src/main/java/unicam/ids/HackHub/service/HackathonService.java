@@ -217,19 +217,32 @@ public class HackathonService {
     }
 
     @Transactional
-    public void declareWinner(String teamName) {
-        Team team = teamService.findByName(teamName);
-        Hackathon hackathon = findHackathonByName(team.getHackathon().getName());
+public void declareWinner(String hackathonName) {
 
-        if (hackathon.getState() != HackathonStatus.CONCLUSO)
-            throw new IllegalArgumentException("Hackathon non concluso, impossibile proclamare il vincitore!");
+    Hackathon hackathon = findHackathonByName(hackathonName);
 
-        hackathon.setTeamWinner(team);
-        save(hackathon);
+    if (hackathon.getState() != HackathonState.CONCLUSO)
+        throw new IllegalArgumentException("Hackathon non concluso, impossibile proclamare il vincitore!");
 
-        // Eroga premio automaticamente
-        paymentService.payWinner(hackathon, hackathon.getOrganizer());
-    }
+    // Prende tutte le submission di quell’hackathon
+    List<Submission> submissions = submissionService.getSubmissionsByHackathonName(hackathon.getName());
+
+    // Trova quella con score più alto tra quelle VALUTATE
+    Submission bestSubmission = submissions.stream()
+            .filter(s -> s.getState() == SubmissionState.VALUTATA)
+            .filter(s -> s.getScore() != null)
+            .max(Comparator.comparing(Submission::getScore))
+            .orElseThrow(() -> new IllegalStateException("Nessuna submission valutata disponibile"));
+
+    Team winnerTeam = bestSubmission.getTeam();
+
+    // Set vincitore
+    hackathon.setTeamWinner(winnerTeam);
+    save(hackathon);
+
+    // Premio automatico (come prima)
+    paymentService.payWinner(hackathon, hackathon.getOrganizer());
+}
 
     public void save(Hackathon hackathon) {
         hackathonRepository.save(hackathon);

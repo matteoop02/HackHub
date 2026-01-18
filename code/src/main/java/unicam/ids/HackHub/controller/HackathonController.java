@@ -342,33 +342,32 @@ public class HackathonController {
     //--------------------------------- VINCITORE E PREMIO ---------------------------------
 
     @PostMapping("/organizzatore/declareWinner")
-    @Operation(
-            summary = "Dichiara il vincitore dell'hackathon",
-            description = "Permette la proclamazione del vincitore",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Dati per la proclamazione",
-                    required = true,
-                    content = @Content(
-                            mediaType = "application/json",
-                            examples = @ExampleObject(
-                                    name = "Esempio proclamazione",
-                                    value = """
+@Operation(
+        summary = "Dichiara il vincitore dell'hackathon",
+        description = "Proclama automaticamente il vincitore in base al punteggio più alto",
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                required = true,
+                content = @Content(
+                        mediaType = "application/json",
+                        examples = @ExampleObject(
+                                name = "Esempio proclamazione automatica",
+                                value = """
                         {
-                          "teamName": "Team Borlotti",
+                          "hackathonName": "Hackathon Unicam 2026"
                         }
                     """
-                            )
-                    )
-            )
-    )
-    @ApiResponse(responseCode = "200", description = "Team proclamato con successo")
-    @ApiResponse(responseCode = "400", description = "Richiesta non valida o dati mancanti")
-    public ResponseEntity<String> declareWinner(@RequestBody @Valid String teamName) {
-        try{
-            hackathonService.declareWinner(teamName);
-            return ResponseEntity.ok("Richiesta proclamazione vincitore avvenuta con successo!");
-        } catch (Exception ex) {
-            return ResponseEntity.badRequest().body("Richiesta non valida!");
-        }
+                        )
+                )
+        )
+)
+@ApiResponse(responseCode = "200", description = "Vincitore proclamato con successo")
+@ApiResponse(responseCode = "400", description = "Richiesta non valida")
+public ResponseEntity<String> declareWinner(@RequestBody @Valid DeclareWinnerRequest request) {
+    try {
+        hackathonService.declareWinner(request.hackathonName());
+        return ResponseEntity.ok("Vincitore proclamato automaticamente in base al punteggio più alto!");
+    } catch (Exception ex) {
+        return ResponseEntity.badRequest().body("Richiesta non valida! " + ex.getMessage());
     }
+}
 }
