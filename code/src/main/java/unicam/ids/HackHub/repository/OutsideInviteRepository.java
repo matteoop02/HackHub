@@ -16,12 +16,13 @@ import java.util.Optional;
 public interface OutsideInviteRepository extends JpaRepository<InviteOutsidePlatform, Long> {
 
     Optional<InviteOutsidePlatform> findByInviteToken(String token);
-
     @Query("SELECT i FROM InviteOutsidePlatform i WHERE i.status = :status AND i.expiresAt < :dateTime")
     List<InviteOutsidePlatform> findExpiredInvites(
             @Param("status") InviteStatus status,
             @Param("dateTime") LocalDateTime dateTime
     );
+
+    
 
     boolean existsByRecipientEmailAndStatus(String email, InviteStatus status);
 
