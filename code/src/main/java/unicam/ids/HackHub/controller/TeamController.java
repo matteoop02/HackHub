@@ -86,7 +86,7 @@ public class TeamController {
     public ResponseEntity<String> leaveTeam(Authentication authentication, @RequestParam @Valid String teamName) {
         try {
             teamService.leaveTeam(authentication, teamName);
-            return ResponseEntity.ok("Membro rimosso con successo");
+            return ResponseEntity.ok("La richiesta di lasciare il team è avvenuta con successo");
         }
         catch(Exception ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());
