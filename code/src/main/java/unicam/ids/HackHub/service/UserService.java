@@ -34,6 +34,7 @@ public class UserService {
         return userRepository.existsByUsername(username);
     }
 
+
     public void changeRole(User user, Long roleId){
         user.setRole(userRoleService.findUserRoleById(roleId));
     }
@@ -47,6 +48,5 @@ public class UserService {
     public void save(User user) {
         userRepository.save(user);
     }
-
 
 }
