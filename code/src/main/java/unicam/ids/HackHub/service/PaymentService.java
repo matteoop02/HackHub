@@ -19,7 +19,7 @@ public class PaymentService {
     public void payWinner(Hackathon hackathon, User organizer) {
 
         if (hackathon.getReward() == null || hackathon.getReward() <= 0)
-            throw new IllegalStateException("Nessun premio previsto per questo hackathon");
+            throw new IllegalStateException("Non c'è nessun premio previsto per questo hackathon");
 
         Team winner = hackathon.getTeamWinner();
         if (winner == null)

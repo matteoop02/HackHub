@@ -43,7 +43,7 @@ public class HackathonController {
     @ApiResponse(responseCode = "400", description = "Errore nella richiesta o dati non validi")
     public ResponseEntity<List<Hackathon>> getHackathonsList(Authentication authentication) {
         try {
-            // Se l'utente è autenticato, restituisci tutti gli hackathon
+            // Se l'utente è autenticato, restituisci tutti gli hackathon, sia privati che pubblici
             if (authentication != null && authentication.isAuthenticated())
                 return ResponseEntity.ok(hackathonService.getHackathons());
 
@@ -68,7 +68,7 @@ public class HackathonController {
     @ApiResponse(responseCode = "400", description = "Errore nella richiesta o dati non validi")
     public ResponseEntity<Hackathon> getHackathonInfo(Authentication authentication, @RequestBody @Valid String hackathonName) {
         try {
-            // Se l'utente è autenticato, restituisci tutti gli hackathon
+            // Se l'utente è autenticato, restituisci tutti gli hackathon sia privati che pubblici
             if (authentication != null && authentication.isAuthenticated())
                 return ResponseEntity.ok(hackathonService.findHackathonInfo(hackathonName));
 
@@ -250,7 +250,7 @@ public class HackathonController {
                                     name = "Esempio iscrizione giudice",
                                     value = """
                 {
-                    "judgeUsername": "Filipp"
+                    "judgeUsername": "Andrea"
                     "hackathonName": "Hackathon Innovazione 2026"
                 }
                 """
@@ -285,7 +285,7 @@ public class HackathonController {
                                     name = "Esempio iscrizione giudice",
                                     value = """
                 {
-                    "mentorUsername": "Filipp"
+                    "mentorUsername": "Marco"
                     "hackathonName": "Hackathon Innovazione 2026"
                 }
                 """
