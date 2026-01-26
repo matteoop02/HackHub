@@ -42,7 +42,7 @@ public class SubmissionService {
     @Transactional(readOnly = true)
     public Submission getSubmissionsByTeamNameAndHackathonNameAndStateIsNot(String name, String hackathonName, SubmissionStatus state) {
         return submissionRepository.findByTeamNameAndHackathonNameAndStateIsNot(name, hackathonName, state)
-                .orElseThrow(() -> new ResourceNotFoundException("Submission not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Submission non trovata"));
     }
 
     public boolean existsSubmissionByTeamNameAndHackathonName(String teamName, String hackathonName) {

@@ -25,7 +25,7 @@ public class TeamController {
             description = "Permette la registrazione di un nuovo team da parte di un Utente"
     )
     @ApiResponse(responseCode = "200", description = "Team registrato con successo")
-    @ApiResponse(responseCode = "400", description = "Team non creato")
+    @ApiResponse(responseCode = "400", description = "Team non creato,errore")
     public ResponseEntity<String> createTeam(Authentication authentication, @RequestBody @Valid CreateTeamRequest  createTeamRequest) {
         try {
             teamService.createTeam(authentication, createTeamRequest);
@@ -62,7 +62,7 @@ public class TeamController {
         Rimuove un membro del team.
     """
     )
-    @ApiResponse(responseCode = "200", description = "Rimozione avvenuta con successo")
+    @ApiResponse(responseCode = "200", description = "Rimozione del membro avvenuta con successo")
     @ApiResponse(responseCode = "400", description = "Errore nella richiesta o dati non validi")
     public ResponseEntity<String> removeMemberToTeam(Authentication authentication, @RequestParam @Valid String member) {
         try {

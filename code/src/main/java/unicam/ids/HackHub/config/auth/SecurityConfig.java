@@ -49,7 +49,6 @@ public class SecurityConfig {
                                 "api/invites/public/**"
                         ).permitAll()
 
-                        // Role-based protected APIs - USA PATTERN ESPLICITI
                         //TEAM - OK
                         .requestMatchers("/api/team/utente/**").hasRole("UTENTE")
                         .requestMatchers("/api/team/membroDelTeam/**").hasRole("MEMBRO_DEL_TEAM")
@@ -90,7 +89,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/calls/leaderDelTeam/**").hasRole("LEADER_DEL_TEAM")
 
 
-                        // Anything else requires authentication
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session ->
