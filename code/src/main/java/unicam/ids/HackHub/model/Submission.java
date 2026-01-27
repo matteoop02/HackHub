@@ -28,11 +28,9 @@ public class Submission {
     @Column(name = "Content", columnDefinition = "TEXT")
     private String content;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @JoinColumn(name = "SendingDate", nullable = false)
+    @Column(name = "SendingDate", nullable = false)
     private LocalDateTime sendingDate;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "LastEdit")
     private LocalDateTime lastEdit;
 

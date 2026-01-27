@@ -11,12 +11,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import unicam.ids.HackHub.dto.requests.CreateHackathonRequest;
+import unicam.ids.HackHub.dto.requests.DeclareWinnerRequest;
 import unicam.ids.HackHub.dto.requests.SignTeamRequest;
 import unicam.ids.HackHub.dto.requests.UpdateHackathonStartDateRequest;
 import unicam.ids.HackHub.model.Hackathon;
 import unicam.ids.HackHub.model.Report;
 import unicam.ids.HackHub.model.Submission;
 import unicam.ids.HackHub.service.HackathonService;
+import unicam.ids.HackHub.strategy.HighestScoreStrategy;
 
 import java.util.List;
 
@@ -364,7 +366,7 @@ public class HackathonController {
 @ApiResponse(responseCode = "400", description = "Richiesta non valida")
 public ResponseEntity<String> declareWinner(@RequestBody @Valid DeclareWinnerRequest request) {
     try {
-        hackathonService.declareWinner(request.hackathonName());
+        hackathonService.declareWinner(request.hackathonName(), new HighestScoreStrategy());
         return ResponseEntity.ok("Vincitore proclamato automaticamente in base al punteggio più alto!");
     } catch (Exception ex) {
         return ResponseEntity.badRequest().body("Richiesta non valida! " + ex.getMessage());

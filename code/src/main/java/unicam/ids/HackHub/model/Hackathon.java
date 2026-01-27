@@ -3,6 +3,9 @@ package unicam.ids.HackHub.model;
 import jakarta.persistence.*;
 import lombok.*;
 import unicam.ids.HackHub.enums.HackathonStatus;
+import unicam.ids.HackHub.observer.HackathonObservable;
+import unicam.ids.HackHub.observer.TeamObserver;
+import unicam.ids.HackHub.state.HackathonState;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -31,15 +34,12 @@ public class Hackathon {
     private String regulation;
 
     @Column(name = "SubscriptionDeadline")
-    @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime subscriptionDeadline;
 
     @Column(name = "StartDate")
-    @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime startDate;
 
     @Column(name = "EndDate")
-    @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime endDate;
 
     @Column(name = "Reward")
@@ -75,4 +75,19 @@ public class Hackathon {
 
     @OneToMany(mappedBy = "hackathon", cascade = CascadeType.ALL)
     private Set<Team> teams = new HashSet<>();
+
+    @Transient
+    private HackathonObservable observable;
+
+    @PostLoad
+    @PostPersist
+    public void initObservable() {
+        if (observable == null) {
+            observable = new HackathonObservable(this);
+            for (Team t : teams) {
+                observable.attach(new TeamObserver(t));
+            }
+        }
+    }
+
 }

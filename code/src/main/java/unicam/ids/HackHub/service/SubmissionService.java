@@ -10,11 +10,13 @@ import unicam.ids.HackHub.dto.requests.UpdateTeamSubmissionRequest;
 import unicam.ids.HackHub.enums.HackathonStatus;
 import unicam.ids.HackHub.enums.SubmissionStatus;
 import unicam.ids.HackHub.exceptions.ResourceNotFoundException;
+import unicam.ids.HackHub.factory.HackathonStateFactory;
 import unicam.ids.HackHub.model.Hackathon;
 import unicam.ids.HackHub.model.Submission;
 import unicam.ids.HackHub.model.Team;
 import unicam.ids.HackHub.model.User;
 import unicam.ids.HackHub.repository.SubmissionRepository;
+import unicam.ids.HackHub.state.HackathonState;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -53,15 +55,9 @@ public class SubmissionService {
     public void evaluateHackathonSubmission(HackathonSubmissionEvaluationRequest request) {
         Hackathon hackathon = hackathonService.findHackathonByName(request.hackathonName());
         Team team = teamService.findByName(request.teamName());
-
-          if (!hackathon.getState().equals(HackathonStatus.IN_VALUTAZIONE))
-        throw new IllegalArgumentException("Hackathon non in valutazione");
-
         Submission submission = getSubmissionsByTeamNameAndHackathonNameAndStateIsNot(team.getName(), hackathon.getName(), SubmissionStatus.VALUTATA);
-
-        submission.setScore(request.score());
-        submission.setComment(request.comment());
-        submission.setState(SubmissionStatus.VALUTATA);
+        HackathonState hackathonState = HackathonStateFactory.from(hackathon.getState());
+        hackathonState.evaluateHackathonSubmission(request, submission);
         submissionRepository.save(submission);
     }
 
@@ -73,20 +69,8 @@ public class SubmissionService {
         if (existsSubmissionByTeamNameAndHackathonName(team.getName(), team.getHackathon().getName()))
             throw new IllegalArgumentException("Sottomissione già esistente per " + team.getName() + "e " + team.getHackathon().getName());
 
-        //Se hackathon non in iscrizione non posso creare la sottomissione
-        if (!team.getHackathon().getState().equals(HackathonStatus.IN_ISCRIZIONE))
-            throw new IllegalArgumentException("Hackathon non in iscrizione");
-
-        Submission submission = Submission.builder()
-                .title(request.title())
-                .content(request.content())
-                .sendingDate(LocalDateTime.now())
-                .lastEdit(LocalDateTime.now())
-                .state(SubmissionStatus.INVIATA)
-                .team(team)
-                .hackathon(team.getHackathon())
-                .build();
-
+        HackathonState hackathonState = HackathonStateFactory.from(team.getHackathon().getState());
+        Submission submission = hackathonState.createSubmission(request.title(), request.content(), team);
         submissionRepository.save(submission);
     }
 
