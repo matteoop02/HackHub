@@ -1,0 +1,24 @@
+package unicam.ids.HackHub.state;
+
+import unicam.ids.HackHub.dto.requests.CreateTeamSubmissionRequest;
+import unicam.ids.HackHub.dto.requests.HackathonSubmissionEvaluationRequest;
+import unicam.ids.HackHub.model.Hackathon;
+import unicam.ids.HackHub.model.Report;
+import unicam.ids.HackHub.model.Submission;
+import unicam.ids.HackHub.model.Team;
+import unicam.ids.HackHub.strategy.WinnerStrategy;
+
+import java.util.List;
+
+public interface HackathonState {
+    void signTeam(Hackathon hackathon, Team team);
+
+    void unsubscribeTeamToHackathon(Hackathon hackathon, Team team);
+
+    void evaluateHackathonSubmission(HackathonSubmissionEvaluationRequest request, Submission submission);
+
+    Submission createSubmission(String title, String content, Team team);
+
+    void declareWinner(Hackathon hackathon, List<Submission> submissions, WinnerStrategy strategy);
+
+}

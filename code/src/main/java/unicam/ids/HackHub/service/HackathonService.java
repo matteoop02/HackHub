@@ -10,16 +10,21 @@ import unicam.ids.HackHub.dto.requests.CreateHackathonRequest;
 import unicam.ids.HackHub.dto.requests.SignTeamRequest;
 import unicam.ids.HackHub.dto.requests.UpdateHackathonStartDateRequest;
 import unicam.ids.HackHub.enums.HackathonStatus;
+import unicam.ids.HackHub.enums.SubmissionStatus;
 import unicam.ids.HackHub.exceptions.*;
+import unicam.ids.HackHub.factory.HackathonStateFactory;
 import unicam.ids.HackHub.model.Hackathon;
 import unicam.ids.HackHub.model.Submission;
 import unicam.ids.HackHub.model.Team;
 import unicam.ids.HackHub.model.User;
 import unicam.ids.HackHub.repository.HackathonRepository;
+import unicam.ids.HackHub.state.HackathonState;
+import unicam.ids.HackHub.strategy.WinnerStrategy;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -87,7 +92,6 @@ public class HackathonService {
                 .state(HackathonStatus.IN_ISCRIZIONE)
                 .organizer(organizer)
                 .build();
-
         save(hackathon);
     }
 
@@ -104,13 +108,9 @@ public class HackathonService {
 
         Hackathon hackathon = findHackathonByName(request.hackathonName());
 
-        validateTeamForSignUp(team, hackathon);
+        HackathonState hackathonState = HackathonStateFactory.from(hackathon.getState());
+        hackathonState.signTeam(hackathon, team);
 
-        // Associa team all'hackathon
-        team.setHackathon(hackathon);
-        hackathon.getTeams().add(team);
-
-        // Salvataggio: cascade salva anche i team
         save(hackathon);
     }
 
@@ -119,27 +119,9 @@ public class HackathonService {
         User leader = userService.findUserByUsername(authentication.getName());
         Team team = teamService.findByName(leader.getTeam().getName());
         Hackathon hackathon = findHackathonByName(team.getHackathon().getName());
-
-        hackathon.getTeams().remove(team);
+        HackathonState hackathonState = HackathonStateFactory.from(hackathon.getState());
+        hackathonState.unsubscribeTeamToHackathon(hackathon, team);
         save(hackathon);
-    }
-
-    // ----------------------- VALIDAZIONE TEAM -----------------------
-
-    private void validateTeamForSignUp(Team team, Hackathon hackathon) {
-
-        if (hackathon.getState() != HackathonStatus.IN_ISCRIZIONE)
-            throw new HackathonClosedException("Hackathon non aperto alle iscrizioni");
-
-        if (team.getHackathon() != null)
-            throw new TeamAlreadyRegisteredException("Il team è già iscritto a un hackathon");
-
-        if (team.getMembers().size() > hackathon.getMaxTeamSize())
-            throw new TeamTooLargeException("Numero membri superiore al massimo consentito");
-
-        //In teoria non serve se aggiorniamo dinamicamente lo stato dell'hackathon
-        if (LocalDateTime.now().isAfter(hackathon.getSubscriptionDeadline()))
-            throw new HackathonClosedException("Scadenza iscrizioni superata");
     }
 
     // ----------------------- FIND -----------------------
@@ -217,32 +199,14 @@ public class HackathonService {
     }
 
     @Transactional
-public void declareWinner(String hackathonName) {
-
-    Hackathon hackathon = findHackathonByName(hackathonName);
-
-    if (hackathon.getState() != HackathonState.CONCLUSO)
-        throw new IllegalArgumentException("Hackathon non concluso, impossibile proclamare il vincitore!");
-
-    // Prende tutte le submission di quell’hackathon
-    List<Submission> submissions = submissionService.getSubmissionsByHackathonName(hackathon.getName());
-
-    // Trova quella con score più alto tra quelle VALUTATE
-    Submission bestSubmission = submissions.stream()
-            .filter(s -> s.getState() == SubmissionState.VALUTATA)
-            .filter(s -> s.getScore() != null)
-            .max(Comparator.comparing(Submission::getScore))
-            .orElseThrow(() -> new IllegalStateException("Nessuna submission valutata disponibile"));
-
-    Team winnerTeam = bestSubmission.getTeam();
-
-    // Set vincitore
-    hackathon.setTeamWinner(winnerTeam);
-    save(hackathon);
-
-    // Premio automatico (come prima)
-    paymentService.payWinner(hackathon, hackathon.getOrganizer());
-}
+    public void declareWinner(String hackathonName, WinnerStrategy strategy) {
+        Hackathon hackathon = findHackathonByName(hackathonName);
+        List<Submission> submissions = submissionService.getSubmissionsByHackathonName(hackathon.getName());
+        HackathonState hackathonState = HackathonStateFactory.from(hackathon.getState());
+        hackathonState.declareWinner(hackathon, submissions, strategy);
+        save(hackathon);
+        paymentService.payWinner(hackathon, hackathon.getOrganizer());
+    }
 
     public void save(Hackathon hackathon) {
         hackathonRepository.save(hackathon);
