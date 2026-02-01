@@ -1,5 +1,8 @@
 package unicam.ids.HackHub.controller;
-
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -37,14 +40,37 @@ public class InviteController {
     }
 
     @PostMapping("/outside/acceptInviteAndRegisterUser")
-    public ResponseEntity<String> acceptInviteAndRegisterUser(@RequestBody @Valid RegisterFromInviteRequest request) {
-        try {
-            inviteService.acceptInviteAndRegisterUser(request);
-            return ResponseEntity.ok("Registrazione completata! Utente aggiunto alla piattaforma.");
-        } catch (Exception ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
-        }
+@Operation(
+        summary = "Accetta invito esterno e registra l'utente",
+        description = "Permette a un utente invitato via email di completare la registrazione usando il token dell’invito.",
+        requestBody = @RequestBody(
+                required = true,
+                content = @Content(
+                        mediaType = "application/json",
+                        examples = @ExampleObject(
+                                name = "Esempio registrazione da invito",
+                                value = """
+                                {
+                                  "token": "abc123TOKENabc123",
+                                  "username": "andrea.pistolesi",
+                                  "name": "Andrea",
+                                  "surname": "Pistolesi",
+                                  "password": "123456789",
+                                  "dateOfBirth": "2000-03-02"
+                                }
+                                """
+                        )
+                )
+        )
+)
+public ResponseEntity<String> acceptInviteAndRegisterUser(@org.springframework.web.bind.annotation.RequestBody @Valid RegisterFromInviteRequest request) {
+    try {
+        inviteService.acceptInviteAndRegisterUser(request);
+        return ResponseEntity.ok("Registrazione completata! Utente aggiunto alla piattaforma.");
+    } catch (Exception ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
     }
+}
 
     @PostMapping("/outside/rejectOutsideInvite")
     public ResponseEntity<String> rejectOutsideInvite(@RequestParam String token) {

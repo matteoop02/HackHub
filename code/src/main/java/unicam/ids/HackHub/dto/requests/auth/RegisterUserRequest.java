@@ -5,7 +5,7 @@ import jakarta.validation.constraints.*;
 
 import java.util.Date;
 
-public record RegisterUserRequest<Int>(
+public record RegisterUserRequest(
         @NotEmpty(message = "Username obbligatorio")
         String username,
 

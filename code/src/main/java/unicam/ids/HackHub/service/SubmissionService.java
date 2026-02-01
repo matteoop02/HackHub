@@ -61,18 +61,35 @@ public class SubmissionService {
         submissionRepository.save(submission);
     }
 
-    public void createSubmission(Authentication authentication, CreateTeamSubmissionRequest request) {
-        User user = userService.findUserByUsername(authentication.getName());
-        Team team = teamService.findByName(user.getTeam().getName());
-
-        //Controllo se esiste una sottomissione per un dato team e hackathon
-        if (existsSubmissionByTeamNameAndHackathonName(team.getName(), team.getHackathon().getName()))
-            throw new IllegalArgumentException("Sottomissione già esistente per " + team.getName() + "e " + team.getHackathon().getName());
-
-        HackathonState hackathonState = HackathonStateFactory.from(team.getHackathon().getState());
-        Submission submission = hackathonState.createSubmission(request.title(), request.content(), team);
-        submissionRepository.save(submission);
+   public void createSubmission(Authentication authentication, CreateTeamSubmissionRequest request) {
+    User user = userService.findUserByUsername(authentication.getName());
+    if (user.getTeam() == null) {
+        throw new IllegalArgumentException("L'utente non appartiene a nessun team");
     }
+    Team team = teamService.findByName(user.getTeam().getName());
+    if (team.getHackathon() == null) {
+        throw new IllegalArgumentException("Il team non è iscritto a nessun hackathon");
+    }
+    if (team.getTeamLeader() == null ||
+        !team.getTeamLeader().getUsername().equals(authentication.getName())) {
+        throw new IllegalArgumentException("Solo il leader del team può inviare la sottomissione");
+    }
+    if (team.getHackathon().getSubscriptionDeadline() == null) {
+        throw new IllegalArgumentException("Scadenza sottomissione non impostata per questo hackathon");
+    }
+    if (java.time.LocalDateTime.now().isAfter(team.getHackathon().getSubscriptionDeadline())) {
+        throw new IllegalArgumentException("Scadenza sottomissione superata");
+    }
+    if (existsSubmissionByTeamNameAndHackathonName(team.getName(), team.getHackathon().getName())) {
+        throw new IllegalArgumentException(
+                "Sottomissione già esistente per " + team.getName() + " e " + team.getHackathon().getName()
+        );
+    }
+
+    HackathonState hackathonState = HackathonStateFactory.from(team.getHackathon().getState());
+    Submission submission = hackathonState.createSubmission(request.title(), request.content(), team);
+    submissionRepository.save(submission);
+}
 
     @Transactional
     public void updateSubmission(UpdateTeamSubmissionRequest request) {
