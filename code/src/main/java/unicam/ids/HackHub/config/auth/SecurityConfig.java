@@ -45,8 +45,8 @@ public class SecurityConfig {
                                 "/h2-console/**",
                                 "/public/**",
                                 "/error/**",
-                                "api/hackathon/public/**",
-                                "api/invites/public/**"
+                                "/api/hackathon/public/**",
+                                "/api/invites/public/**"
                         ).permitAll()
 
                         //TEAM - OK
@@ -61,17 +61,17 @@ public class SecurityConfig {
 
                         //INVITE - OK
                         .requestMatchers("/api/invites/outside/**")
-                        .access((authentication, context) -> {
-                            boolean forbidden = authentication.get().getAuthorities().stream()
-                                    .anyMatch(a -> a.getAuthority().equals("UTENTE") ||
-                                            a.getAuthority().equals("MEMBRO_DEL_TEAM") ||
-                                            a.getAuthority().equals("LEADER_DEL_TEAM") ||
-                                            a.getAuthority().equals("MENTORE") ||
-                                            a.getAuthority().equals("GIUDICE") ||
-                                            a.getAuthority().equals("ORGANIZZATORE"));
+                                .access((authentication, context) -> {
+                                boolean forbidden = authentication.get().getAuthorities().stream()
+                                .anyMatch(a -> a.getAuthority().equals("ROLE_UTENTE") ||
+                    a.getAuthority().equals("ROLE_MEMBRO_DEL_TEAM") ||
+                    a.getAuthority().equals("ROLE_LEADER_DEL_TEAM") ||
+                    a.getAuthority().equals("ROLE_MENTORE") ||
+                    a.getAuthority().equals("ROLE_GIUDICE") ||
+                    a.getAuthority().equals("ROLE_ORGANIZZATORE"));
 
-                            return new AuthorizationDecision(!forbidden);
-                        })
+    return new AuthorizationDecision(!forbidden);
+})
                         .requestMatchers("/api/invites/inviteManage/**").hasAnyRole("UTENTE", "MEMBRO_DEL_TEAM", "LEADER_DEL_TEAM")
                         .requestMatchers("/api/invites/leaderDelTeam/**").hasRole("LEADER_DEL_TEAM")
 

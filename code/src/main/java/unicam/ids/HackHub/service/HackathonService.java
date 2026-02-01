@@ -158,6 +158,16 @@ public class HackathonService {
     }
 
     @Transactional
+public void removeJudge(String hackathonName) {
+    Hackathon hackathon = findHackathonByName(hackathonName);
+    if (hackathon.getJudge() == null) {
+        throw new IllegalArgumentException("Nessun giudice assegnato a questo hackathon");
+    }
+    hackathon.setJudge(null);
+    hackathonRepository.save(hackathon);
+}
+
+    @Transactional
     public void addMentor(String hackathonName, String mentorUsername) {
         Hackathon hackathon = findHackathonByName(hackathonName);
         hackathon.getMentors().add(userService.findUserByUsername(mentorUsername));

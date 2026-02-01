@@ -262,14 +262,49 @@ public class HackathonController {
     )
     @ApiResponse(responseCode = "200", description = "Giudice iscritto con successo all'hackathon")
     @ApiResponse(responseCode = "400", description = "Errore durante l'iscrizione del giudice")
-    public ResponseEntity<String> setJudge(@RequestBody @Valid String judgeUsername, String hackathonName) {
-        try {
-            hackathonService.setJudge(hackathonName, judgeUsername);
-            return ResponseEntity.ok("Giudice iscritto all'hackathon con successo");
-        } catch(Exception ex) {
-            return ResponseEntity.badRequest().body("Iscrizione del giudice all'hackathon fallita! " + ex.getMessage());
-        }
+   public ResponseEntity<String> setJudge(
+        @RequestParam String hackathonName,
+        @RequestBody @Valid String judgeUsername
+) {
+    try {
+        hackathonService.setJudge(hackathonName, judgeUsername);
+        return ResponseEntity.ok("Giudice iscritto all'hackathon con successo");
+    } catch(Exception ex) {
+        return ResponseEntity.badRequest().body("Iscrizione del giudice all'hackathon fallita! " + ex.getMessage());
     }
+}
+
+    @PostMapping("/organizzatore/removeJudge")
+@Operation(
+        summary = "Rimozione del giudice da un Hackathon",
+        description = """
+        Permette ad un organizzatore di rimuovere il giudice assegnato ad un hackathon.
+        Richiede nome dell'hackathon.
+    """,
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                required = true,
+                description = "Nome dell'hackathon da cui rimuovere il giudice",
+                content = @Content(
+                        mediaType = "application/json",
+                        examples = @ExampleObject(
+                                name = "Esempio rimozione giudice",
+                                value = """
+                        "Hackathon Innovazione 2026"
+                    """
+                        )
+                )
+        )
+)
+@ApiResponse(responseCode = "200", description = "Giudice rimosso con successo dall'hackathon")
+@ApiResponse(responseCode = "400", description = "Errore durante la rimozione del giudice")
+public ResponseEntity<String> removeJudge(@RequestParam String hackathonName) {
+    try {
+        hackathonService.removeJudge(hackathonName);
+        return ResponseEntity.ok("Giudice rimosso dall'hackathon con successo");
+    } catch (Exception ex) {
+        return ResponseEntity.badRequest().body("Rimozione del giudice fallita! " + ex.getMessage());
+    }
+}
 
     @PostMapping("/organizzatore/addMentor")
     @Operation(
@@ -297,14 +332,17 @@ public class HackathonController {
     )
     @ApiResponse(responseCode = "200", description = "Mentore iscritto con successo all'hackathon")
     @ApiResponse(responseCode = "400", description = "Errore durante l'iscrizione del mentore")
-    public ResponseEntity<String> addMentor(@RequestBody @Valid String mentorUsername, String hackathonName) {
-        try {
-            hackathonService.addMentor(hackathonName, mentorUsername);
-            return ResponseEntity.ok("Mentore iscritto all'hackathon con successo");
-        } catch(Exception ex) {
-            return ResponseEntity.badRequest().body("Iscrizione del mentore all'hackathon fallita! " + ex.getMessage());
-        }
+   public ResponseEntity<String> addMentor(
+        @RequestParam String hackathonName,
+        @RequestBody @Valid String mentorUsername
+) {
+    try {
+        hackathonService.addMentor(hackathonName, mentorUsername);
+        return ResponseEntity.ok("Mentore iscritto all'hackathon con successo");
+    } catch(Exception ex) {
+        return ResponseEntity.badRequest().body("Iscrizione del mentore all'hackathon fallita! " + ex.getMessage());
     }
+}
 
     @PostMapping("/organizzatore/removeMentor")
     @Operation(
@@ -332,14 +370,17 @@ public class HackathonController {
     )
     @ApiResponse(responseCode = "200", description = "Mentore rimosso con successo all'hackathon")
     @ApiResponse(responseCode = "400", description = "Errore durante la rimozione del mentore")
-    public ResponseEntity<String> removeMentor(@RequestBody @Valid String mentorUsername, String hackathonName) {
-        try {
-            hackathonService.removeMentor(hackathonName, mentorUsername);
-            return ResponseEntity.ok("Mentore rimosso dall'hackathon con successo");
-        } catch(Exception ex) {
-            return ResponseEntity.badRequest().body("Rimozione del mentore all'hackathon fallita! " + ex.getMessage());
-        }
+   public ResponseEntity<String> removeMentor(
+        @RequestParam String hackathonName,
+        @RequestBody @Valid String mentorUsername
+) {
+    try {
+        hackathonService.removeMentor(hackathonName, mentorUsername);
+        return ResponseEntity.ok("Mentore rimosso dall'hackathon con successo");
+    } catch(Exception ex) {
+        return ResponseEntity.badRequest().body("Rimozione del mentore all'hackathon fallita! " + ex.getMessage());
     }
+}
 
     //--------------------------------- VINCITORE E PREMIO ---------------------------------
 

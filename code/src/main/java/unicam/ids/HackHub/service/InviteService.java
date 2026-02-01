@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +31,7 @@ public class InviteService {
     private final TeamService teamService;
     private final UserService userService;
     private final UserRoleService userRoleService;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public InviteOutsidePlatform inviteOutsideUser(Authentication authentication, OutsideInviteRequest outsideInviteRequest) {
@@ -71,13 +72,25 @@ public class InviteService {
         if (invite.getStatus() != InviteStatus.PENDING)
             throw new IllegalStateException("Invito non più valido");
 
+           if (userService.existsUserByUsername(request.username()))
+        throw new IllegalArgumentException("Username già esistente: " + request.username());
+
+        try {
+        userService.findUserByEmail(invite.getRecipientEmail());
+        throw new IllegalArgumentException("Email già registrata: " + invite.getRecipientEmail());
+    } catch (Exception ignored) {
+    }
+
         //Crea utente sulla piattaforma
         User user = User.builder()
+                .username(request.username())                      
                 .email(invite.getRecipientEmail())
                 .name(request.name())
                 .surname(request.surname())
-                .password(request.password())
-                .role(userRoleService.getDefaultUserRole())
+                .password(passwordEncoder.encode(request.password())) 
+                .dateOfBirth(request.dateOfBirth())                
+                .role(userRoleService.findUserRoleById(1L))         
+                .isDeleted(false)                          
                 .build();
 
         userService.save(user);

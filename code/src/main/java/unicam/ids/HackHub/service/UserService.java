@@ -9,7 +9,7 @@ import unicam.ids.HackHub.model.User;
 import unicam.ids.HackHub.model.UserRole;
 import unicam.ids.HackHub.repository.TeamRepository;
 import unicam.ids.HackHub.repository.UserRepository;
-
+import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Optional;
 
 @Service
@@ -33,6 +33,10 @@ public class UserService {
     public boolean existsUserByUsername(String username) {
         return userRepository.existsByUsername(username);
     }
+
+    public boolean existsUserByEmail(String email) {
+    return userRepository.existsByEmail(email);
+}
 
 
     public void changeRole(User user, Long roleId){
