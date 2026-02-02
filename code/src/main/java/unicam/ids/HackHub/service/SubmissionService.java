@@ -61,6 +61,24 @@ public class SubmissionService {
         submissionRepository.save(submission);
     }
 
+    @Transactional
+public void updateHackathonSubmissionEvaluation(HackathonSubmissionEvaluationRequest request) {
+
+    Hackathon hackathon = hackathonService.findHackathonByName(request.hackathonName());
+    Team team = teamService.findByName(request.teamName());
+    if (LocalDateTime.now().isAfter(hackathon.getEndDate())) {
+        throw new IllegalArgumentException("Scadenza per modificare la valutazione superata");
+    }
+    Submission submission = submissionRepository
+            .findByTeamNameAndHackathonName(team.getName(), hackathon.getName())
+            .orElseThrow(() -> new ResourceNotFoundException("Submission non trovata"));
+    HackathonState hackathonState = HackathonStateFactory.from(hackathon.getState());
+    hackathonState.evaluateHackathonSubmission(request, submission);
+
+    submissionRepository.save(submission);
+}
+
+
    public void createSubmission(Authentication authentication, CreateTeamSubmissionRequest request) {
     User user = userService.findUserByUsername(authentication.getName());
     if (user.getTeam() == null) {
