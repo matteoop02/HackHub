@@ -87,6 +87,16 @@ public class SubmissionController {
         }
     }
 
+    @PostMapping("/judge/updateEvaluation")
+public ResponseEntity<String> updateEvaluation(@RequestBody @Valid HackathonSubmissionEvaluationRequest req) {
+    try {
+        submissionService.updateHackathonSubmissionEvaluation(req);
+        return ResponseEntity.ok("Valutazione aggiornata");
+    } catch (Exception ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+}
+
     @GetMapping("/staff/assigned")
 public ResponseEntity<List<Submission>> getAssignedSubmissions(Authentication authentication) {
     try {

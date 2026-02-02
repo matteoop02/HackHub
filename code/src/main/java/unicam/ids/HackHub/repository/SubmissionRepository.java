@@ -16,6 +16,9 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
     Boolean existsSubmissionByTitle(String title);
 
     Optional<Submission> findByTeamNameAndHackathonNameAndStateIsNot(String name, String hackathonName, SubmissionStatus state);
+    //per aggiornare la sottomissione,così non considero lo stato
+    Optional<Submission> findByTeamNameAndHackathonName(String teamName, String hackathonName);
+
 
     boolean existsSubmissionByTeamNameAndHackathonName(String teamName, String hackathonName);
 }
