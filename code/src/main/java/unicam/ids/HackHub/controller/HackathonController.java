@@ -10,10 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import unicam.ids.HackHub.dto.requests.CreateHackathonRequest;
-import unicam.ids.HackHub.dto.requests.DeclareWinnerRequest;
-import unicam.ids.HackHub.dto.requests.SignTeamRequest;
-import unicam.ids.HackHub.dto.requests.UpdateHackathonStartDateRequest;
+import unicam.ids.HackHub.dto.requests.*;
 import unicam.ids.HackHub.model.Hackathon;
 import unicam.ids.HackHub.model.Report;
 import unicam.ids.HackHub.model.Submission;
@@ -68,14 +65,14 @@ public class HackathonController {
     )
     @ApiResponse(responseCode = "200", description = "Informazioni hackathon ottenute con successo")
     @ApiResponse(responseCode = "400", description = "Errore nella richiesta o dati non validi")
-    public ResponseEntity<Hackathon> getHackathonInfo(Authentication authentication, @RequestBody @Valid String hackathonName) {
+    public ResponseEntity<Hackathon> getHackathonInfo(Authentication authentication, @RequestBody @Valid HackathonInfoRequest hackathonInfoRequest) {
         try {
             // Se l'utente è autenticato, restituisci tutti gli hackathon sia privati che pubblici
             if (authentication != null && authentication.isAuthenticated())
-                return ResponseEntity.ok(hackathonService.findHackathonInfo(hackathonName));
+                return ResponseEntity.ok(hackathonService.findHackathonInfo(hackathonInfoRequest.id()));
 
             // Altrimenti restituisci solo quelli pubblici
-            return ResponseEntity.ok(hackathonService.findPublicHackathonInfo(hackathonName));
+            return ResponseEntity.ok(hackathonService.findPublicHackathonInfo(hackathonInfoRequest.id()));
         }
         catch(Exception ex) {
             return ResponseEntity.badRequest().build();

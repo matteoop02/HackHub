@@ -134,13 +134,28 @@ public class HackathonService {
                 .orElseThrow(() -> new ResourceNotFoundException("Hackathon non trovato"));
     }
 
-    @Transactional(readOnly = true)
-    public Hackathon findHackathonInfo(String hackathonName) {
-        return findHackathonByName(hackathonName);
+    public Hackathon findHackathonById(int id) {
+        return hackathonRepository.findAll().stream()
+                .filter(h -> h.getId() == id)
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Hackathon non trovato"));
     }
 
-    public Hackathon findPublicHackathonInfo(String hackathonName) {
-        return hackathonRepository.findHackathonByNameAndIsPublic(hackathonName, true)
+    @Transactional(readOnly = true)
+    public Hackathon findHackathonInfo(int id) {
+        return findHackathonById(id);
+    }
+
+    public Hackathon findPublicHackathonInfo(int id) {
+        return hackathonRepository.findHackathonByIdAndIsPublic(id, true)
+                .orElseThrow(() -> new ResourceNotFoundException("Hackathon non trovato"));
+    }
+
+    public Hackathon findHackathonByIdAndIsPublic(int id) {
+        return hackathonRepository.findAll().stream()
+                .filter(h -> h.getId() == id)
+                .filter(Hackathon::getIsPublic)
+                .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Hackathon non trovato"));
     }
 

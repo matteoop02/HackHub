@@ -15,20 +15,15 @@ import java.util.List;
 @Repository
 public interface InsideInviteRepository extends JpaRepository<InviteInsidePlatform, Long> {
 
-    List<InviteInsidePlatform> findByRecipientUserAndStatus(User recipientUser, InviteStatus status);
+    @Query("SELECT i FROM InviteInsidePlatform i WHERE i.recipientUser = :recipientUser AND i.status = :status")
+    List<InviteInsidePlatform> findByRecipientUserAndStatus(@Param("recipientUser") User recipientUser, @Param("status") InviteStatus status);
 
-    List<InviteInsidePlatform> findByTeamAndStatus(Team team, InviteStatus status);
-    boolean existsByRecipientUserAndTeamAndStatus(User recipientUser, Team team, InviteStatus status);
+    @Query("SELECT i FROM InviteInsidePlatform i WHERE i.team = :team AND i.status = :status")
+    List<InviteInsidePlatform> findByTeamAndStatus(@Param("team") Team team, @Param("status") InviteStatus status);
 
+    @Query("SELECT CASE WHEN COUNT(i) > 0 THEN true ELSE false END FROM InviteInsidePlatform i " + "WHERE i.recipientUser = :recipientUser AND i.team = :team AND i.status = :status")
+    boolean existsByRecipientUserAndTeamAndStatus(@Param("recipientUser") User recipientUser, @Param("team") Team team, @Param("status") InviteStatus status);
 
-
-    @Query("""
-        SELECT i
-        FROM InviteInsidePlatform i
-        WHERE i.status = :status AND i.expiresAt < :dateTime
-    """)
-    List<InviteInsidePlatform> findExpiredInvites(
-            @Param("status") InviteStatus status,
-            @Param("dateTime") LocalDateTime dateTime
-    );
+    @Query("SELECT i FROM InviteInsidePlatform i WHERE i.status = :status AND i.expiresAt < :dateTime")
+    List<InviteInsidePlatform> findExpiredInvites(@Param("status") InviteStatus status, @Param("dateTime") LocalDateTime dateTime);
 }
