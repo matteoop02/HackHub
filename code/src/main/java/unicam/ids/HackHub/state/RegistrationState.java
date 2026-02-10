@@ -19,6 +19,10 @@ public class RegistrationState implements HackathonState {
 
     @Override
     public void signTeam(Hackathon hackathon, Team team) {
+            if (hackathon.getSubscriptionDeadline() != null
+            && LocalDateTime.now().isAfter(hackathon.getSubscriptionDeadline())) {
+        throw new IllegalStateException("Iscrizioni chiuse: deadline superata");
+    }
         if (team.getHackathon() != null)
             throw new TeamAlreadyRegisteredException("Il team è già iscritto a un hackathon");
         if (team.getMembers().size() > hackathon.getMaxTeamSize())

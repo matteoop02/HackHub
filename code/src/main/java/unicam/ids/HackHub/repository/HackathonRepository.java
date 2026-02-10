@@ -37,4 +37,8 @@ public interface HackathonRepository extends JpaRepository<Hackathon, Long> {
 
     @Query("SELECT h FROM Hackathon h JOIN h.mentors m WHERE m = :mentor")
     List<Hackathon> findHackathonByMentors(@Param("mentor") User user);
+
+    List<Hackathon> findByStateAndStartDateLessThanEqual(HackathonStatus state, LocalDateTime now);
+
+    List<Hackathon> findByStateAndEndDateLessThanEqual(HackathonStatus state, LocalDateTime now);
 }

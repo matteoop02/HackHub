@@ -95,6 +95,30 @@ public class HackathonService {
         save(hackathon);
     }
 
+    @Transactional
+    public void startHackathons(LocalDateTime now) {
+    List<Hackathon> toStart = hackathonRepository
+            .findByStateAndStartDateLessThanEqual(HackathonStatus.IN_ISCRIZIONE, now);
+
+    for (Hackathon h : toStart) {
+        h.setState(HackathonStatus.IN_CORSO);
+    }
+
+    hackathonRepository.saveAll(toStart);
+}
+
+@Transactional
+    public void moveHackathonsToEvaluation(LocalDateTime now) {
+    List<Hackathon> toEval = hackathonRepository
+            .findByStateAndEndDateLessThanEqual(HackathonStatus.IN_CORSO, now);
+
+    for (Hackathon h : toEval) {
+        h.setState(HackathonStatus.IN_VALUTAZIONE);
+    }
+
+    hackathonRepository.saveAll(toEval);
+}
+
     // ----------------------- SIGN/UNSUBSCRIBE TEAM TO HACKATHON -----------------------
 
     @Transactional
@@ -211,7 +235,6 @@ public void removeJudge(String hackathonName) {
             Duration diff = Duration.between(hackathon.getStartDate(), hackathon.getEndDate());
             newEnd = newStart.plus(diff);
         }
-
         // Validazioni (forse si può togliere perche uso @ChronologicalDates)
         if (!newStart.isBefore(newEnd)) {
             throw new IllegalArgumentException("La data di inizio deve essere antecedente alla data di fine");

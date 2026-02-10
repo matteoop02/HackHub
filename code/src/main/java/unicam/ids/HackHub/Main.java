@@ -5,6 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @OpenAPIDefinition
+@EnableScheduling
 @SpringBootApplication(scanBasePackages = "unicam.ids.HackHub")
 public class Main {
     public static void main(String[] args) {
