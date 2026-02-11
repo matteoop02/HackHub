@@ -20,6 +20,12 @@ import unicam.ids.HackHub.model.User;
 import unicam.ids.HackHub.repository.HackathonRepository;
 import unicam.ids.HackHub.state.HackathonState;
 import unicam.ids.HackHub.strategy.WinnerStrategy;
+import unicam.ids.HackHub.service.PaymentService;
+import unicam.ids.HackHub.service.SubmissionService;
+import unicam.ids.HackHub.service.TeamService;
+import unicam.ids.HackHub.service.UserService;
+import unicam.ids.HackHub.service.HackathonService;
+import unicam.ids.HackHub.scheduler.HackathonStateScheduler;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -57,7 +63,7 @@ public class HackathonService {
             hackathons = hackathonRepository.findHackathonByOrganizer(user);
         else if (user.getRole().getId() == 5L)
             hackathons = hackathonRepository.findHackathonByJudge(user);
-        else if(user.getRole().getId() == 4L)
+        else if (user.getRole().getId() == 4L)
             hackathons = hackathonRepository.findHackathonByMentors(user);
 
         return hackathons;
@@ -97,29 +103,29 @@ public class HackathonService {
 
     @Transactional
     public void startHackathons(LocalDateTime now) {
-    List<Hackathon> toStart = hackathonRepository
-            .findByStateAndStartDateLessThanEqual(HackathonStatus.IN_ISCRIZIONE, now);
+        List<Hackathon> toStart = hackathonRepository
+                .findByStateAndStartDateLessThanEqual(HackathonStatus.IN_ISCRIZIONE, now);
 
-    for (Hackathon h : toStart) {
-        h.setState(HackathonStatus.IN_CORSO);
+        for (Hackathon h : toStart) {
+            h.setState(HackathonStatus.IN_CORSO);
+        }
+
+        hackathonRepository.saveAll(toStart);
     }
 
-    hackathonRepository.saveAll(toStart);
-}
-
-@Transactional
+    @Transactional
     public void moveHackathonsToEvaluation(LocalDateTime now) {
-    List<Hackathon> toEval = hackathonRepository
-            .findByStateAndEndDateLessThanEqual(HackathonStatus.IN_CORSO, now);
+        List<Hackathon> toEval = hackathonRepository
+                .findByStateAndEndDateLessThanEqual(HackathonStatus.IN_CORSO, now);
 
-    for (Hackathon h : toEval) {
-        h.setState(HackathonStatus.IN_VALUTAZIONE);
+        for (Hackathon h : toEval) {
+            h.setState(HackathonStatus.IN_VALUTAZIONE);
+        }
+
+        hackathonRepository.saveAll(toEval);
     }
 
-    hackathonRepository.saveAll(toEval);
-}
-
-    // ----------------------- SIGN/UNSUBSCRIBE TEAM TO HACKATHON -----------------------
+    // ----------------------- SIGN/UNSUBSCRIBE TEAM TO HACKATHON
 
     @Transactional
     public void signTeamToHackathon(Authentication authentication, SignTeamRequest request) {
@@ -197,14 +203,14 @@ public class HackathonService {
     }
 
     @Transactional
-public void removeJudge(String hackathonName) {
-    Hackathon hackathon = findHackathonByName(hackathonName);
-    if (hackathon.getJudge() == null) {
-        throw new IllegalArgumentException("Nessun giudice assegnato a questo hackathon");
+    public void removeJudge(String hackathonName) {
+        Hackathon hackathon = findHackathonByName(hackathonName);
+        if (hackathon.getJudge() == null) {
+            throw new IllegalArgumentException("Nessun giudice assegnato a questo hackathon");
+        }
+        hackathon.setJudge(null);
+        hackathonRepository.save(hackathon);
     }
-    hackathon.setJudge(null);
-    hackathonRepository.save(hackathon);
-}
 
     @Transactional
     public void addMentor(String hackathonName, String mentorUsername) {
@@ -260,5 +266,3 @@ public void removeJudge(String hackathonName) {
         hackathonRepository.save(hackathon);
     }
 }
-
-
