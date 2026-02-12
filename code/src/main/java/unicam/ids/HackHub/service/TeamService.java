@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import unicam.ids.HackHub.dto.requests.CreateTeamRequest;
+import unicam.ids.HackHub.dto.responses.TeamMemberResponse;
 import unicam.ids.HackHub.exceptions.ResourceNotFoundException;
 import unicam.ids.HackHub.model.Team;
 import unicam.ids.HackHub.model.User;
@@ -14,6 +15,7 @@ import unicam.ids.HackHub.repository.TeamRepository;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 
 @Service
@@ -123,4 +125,32 @@ public class TeamService {
     public void save(Team team) {
         teamRepository.save(team);
     }
+
+    @Transactional
+public List<TeamMemberResponse> getMembersForLeader(Authentication authentication) {
+
+    User leader = userService.findUserByUsername(authentication.getName());
+
+    if (leader.getTeam() == null) {
+        throw new IllegalArgumentException("L'utente non appartiene a nessun team");
+    }
+
+    // solo il leader può farlo
+    if (!leader.getTeam().getTeamLeader().getUsername()
+            .equals(leader.getUsername())) {
+        throw new IllegalArgumentException("Solo il leader può visualizzare i membri");
+    }
+
+    return leader.getTeam().getMembers().stream()
+            .map(u -> new TeamMemberResponse(
+                    u.getUsername(),
+                    u.getName(),
+                    u.getSurname(),
+                    u.getEmail(),
+                    u.getRole().getName()
+            ))
+            .toList();
+}
+
+
 }
