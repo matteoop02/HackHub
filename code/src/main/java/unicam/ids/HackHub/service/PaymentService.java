@@ -3,17 +3,21 @@ package unicam.ids.HackHub.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import unicam.ids.HackHub.dto.responses.PaymentStatusResponse;
 import unicam.ids.HackHub.enums.PaymentStatus;
 import unicam.ids.HackHub.model.*;
 import unicam.ids.HackHub.repository.PaymentRepository;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class PaymentService {
 
     @Autowired
     private PaymentRepository paymentRepository;
+    @Autowired
+    private HackathonService hackathonService;
 
     @Transactional
     public void payWinner(Hackathon hackathon, User organizer) {
@@ -39,7 +43,7 @@ public class PaymentService {
     }
 
     @Transactional(readOnly = true)
-public PaymentStatusResponse verifyHackathonPricePayment(String hackathonName) {
+    public PaymentStatusResponse verifyHackathonPricePayment(String hackathonName) {
     Hackathon hackathon = hackathonService.findHackathonByName(hackathonName);
     Optional<Payment> paymentOpt =
             paymentRepository.findTopByHackathonIdOrderByPaymentDateDesc(hackathon.getId());
@@ -60,8 +64,7 @@ public PaymentStatusResponse verifyHackathonPricePayment(String hackathonName) {
 
     Double expected = hackathon.getReward();
     boolean amountMatchesReward =
-            payment.getAmount() != null && expected != null
-                    && payment.getAmount().equals(expected);
+            payment.getAmount() != null && payment.getAmount().equals(expected);
 
     return new PaymentStatusResponse(
             true,
