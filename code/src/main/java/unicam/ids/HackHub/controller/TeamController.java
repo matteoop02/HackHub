@@ -97,9 +97,9 @@ public class TeamController {
         }
     }
 
-    @GetMapping("/leaderDelTeam/members")
-public ResponseEntity<List<TeamMemberResponse>> getTeamMembers(Authentication authentication) {
-    return ResponseEntity.ok(teamService.getMembersForLeader(authentication));
+ @GetMapping("/membroDelTeam/members")
+public ResponseEntity<List<TeamMemberResponse>> getMyTeamMembers(Authentication authentication) {
+    return ResponseEntity.ok(teamService.getTeamMembers(authentication));
 }
 
 

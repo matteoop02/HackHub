@@ -126,22 +126,12 @@ public class TeamService {
         teamRepository.save(team);
     }
 
-    @Transactional
-public List<TeamMemberResponse> getMembersForLeader(Authentication authentication) {
-
-    User leader = userService.findUserByUsername(authentication.getName());
-
-    if (leader.getTeam() == null) {
+    public List<TeamMemberResponse> getTeamMembers(Authentication authentication) {
+    User user = userService.findUserByUsername(authentication.getName());
+    if (user.getTeam() == null) {
         throw new IllegalArgumentException("L'utente non appartiene a nessun team");
     }
-
-    // solo il leader può farlo
-    if (!leader.getTeam().getTeamLeader().getUsername()
-            .equals(leader.getUsername())) {
-        throw new IllegalArgumentException("Solo il leader può visualizzare i membri");
-    }
-
-    return leader.getTeam().getMembers().stream()
+    return user.getTeam().getMembers().stream()
             .map(u -> new TeamMemberResponse(
                     u.getUsername(),
                     u.getName(),
@@ -151,6 +141,5 @@ public List<TeamMemberResponse> getMembersForLeader(Authentication authenticatio
             ))
             .toList();
 }
-
 
 }
