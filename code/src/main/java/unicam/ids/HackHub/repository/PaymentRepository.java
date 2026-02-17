@@ -11,11 +11,5 @@ import java.util.Optional;
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
        Optional<Payment> findTopByHackathonIdOrderByPaymentDateDesc(Long hackathonId);
-
-    List<Payment> findByHackathonId(Long hackathonId);
-
-    boolean existsByHackathonId(Long hackathonId);
-
-    boolean existsByHackathonIdAndStatus(Long hackathonId, PaymentStatus status);
 }
 
