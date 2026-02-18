@@ -1,9 +1,7 @@
 package unicam.ids.HackHub.state;
 
-import unicam.ids.HackHub.dto.requests.CreateTeamSubmissionRequest;
 import unicam.ids.HackHub.dto.requests.HackathonSubmissionEvaluationRequest;
 import unicam.ids.HackHub.model.Hackathon;
-import unicam.ids.HackHub.model.Report;
 import unicam.ids.HackHub.model.Submission;
 import unicam.ids.HackHub.model.Team;
 import unicam.ids.HackHub.strategy.WinnerStrategy;

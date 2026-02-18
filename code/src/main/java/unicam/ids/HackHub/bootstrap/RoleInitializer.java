@@ -3,6 +3,7 @@ package unicam.ids.HackHub.bootstrap;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import unicam.ids.HackHub.model.UserRole;
 import unicam.ids.HackHub.repository.UserRoleRepository;
 
@@ -10,6 +11,7 @@ import unicam.ids.HackHub.repository.UserRoleRepository;
 public class RoleInitializer {
 
     @Bean
+    @Order(1)
     CommandLineRunner initRoles(UserRoleRepository roleRepo) {
         return args -> {
             createRoleIfNotFound(roleRepo, 1L,"UTENTE");

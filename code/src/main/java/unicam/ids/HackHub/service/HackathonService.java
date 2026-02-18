@@ -1,6 +1,5 @@
 package unicam.ids.HackHub.service;
 
-import org.h2.engine.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
@@ -9,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import unicam.ids.HackHub.dto.requests.CreateHackathonRequest;
 import unicam.ids.HackHub.dto.requests.SignTeamRequest;
 import unicam.ids.HackHub.dto.requests.UpdateHackathonStartDateRequest;
+import unicam.ids.HackHub.dto.responses.PaymentStatusResponse;
 import unicam.ids.HackHub.enums.HackathonStatus;
-import unicam.ids.HackHub.enums.SubmissionStatus;
 import unicam.ids.HackHub.exceptions.*;
 import unicam.ids.HackHub.factory.HackathonStateFactory;
 import unicam.ids.HackHub.model.Hackathon;
@@ -20,17 +19,10 @@ import unicam.ids.HackHub.model.User;
 import unicam.ids.HackHub.repository.HackathonRepository;
 import unicam.ids.HackHub.state.HackathonState;
 import unicam.ids.HackHub.strategy.WinnerStrategy;
-import unicam.ids.HackHub.service.PaymentService;
-import unicam.ids.HackHub.service.SubmissionService;
-import unicam.ids.HackHub.service.TeamService;
-import unicam.ids.HackHub.service.UserService;
-import unicam.ids.HackHub.service.HackathonService;
-import unicam.ids.HackHub.scheduler.HackathonStateScheduler;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -79,7 +71,6 @@ public class HackathonService {
     @Transactional
     public void createHackathon(Authentication authentication, CreateHackathonRequest request) {
 
-        // Controllo duplicati nome
         if (hackathonRepository.existsByName(request.name().trim()))
             throw new DuplicateHackathonException("Esiste già un hackathon con lo stesso nome");
 
@@ -125,7 +116,7 @@ public class HackathonService {
         hackathonRepository.saveAll(toEval);
     }
 
-    // ----------------------- SIGN/UNSUBSCRIBE TEAM TO HACKATHON
+    // ----------------------- SIGN/UNSUBSCRIBE TEAM TO HACKATHON -----------------------
 
     @Transactional
     public void signTeamToHackathon(Authentication authentication, SignTeamRequest request) {
@@ -193,6 +184,14 @@ public class HackathonService {
         return submissionService.getSubmissionsByHackathonName(authentication.getName());
     }
 
+    // ----------------------- PAYMENT -----------------------
+
+    @Transactional(readOnly = true)
+    public PaymentStatusResponse verifyHackathonPricePayment(String hackathonName) {
+        Hackathon hackathon = findHackathonByName(hackathonName);
+        return paymentService.verifyPaymentForHackathon(hackathon);
+    }
+
     // ----------------------- HELPER -----------------------
 
     @Transactional
@@ -234,14 +233,12 @@ public class HackathonService {
         LocalDateTime newEnd;
 
         if (request.endDate() != null) {
-            // Usa il valore fornito dal client
             newEnd = request.endDate();
         } else {
-            // Mantiene la differenza tra start e end
             Duration diff = Duration.between(hackathon.getStartDate(), hackathon.getEndDate());
             newEnd = newStart.plus(diff);
         }
-        // Validazioni (forse si può togliere perche uso @ChronologicalDates)
+
         if (!newStart.isBefore(newEnd)) {
             throw new IllegalArgumentException("La data di inizio deve essere antecedente alla data di fine");
         }

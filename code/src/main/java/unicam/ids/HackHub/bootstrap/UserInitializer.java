@@ -3,6 +3,7 @@ package unicam.ids.HackHub.bootstrap;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import unicam.ids.HackHub.model.User;
 import unicam.ids.HackHub.model.UserRole;
@@ -19,6 +20,7 @@ public class UserInitializer {
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Bean
+    @Order(2)
     CommandLineRunner initUsers(UserRepository userRepo, UserRoleRepository userRoleRepo) {
         return args -> {
             createUserIfNotFound(userRepo, userRoleRepo,
