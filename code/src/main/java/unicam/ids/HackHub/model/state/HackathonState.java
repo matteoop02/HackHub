@@ -1,10 +1,10 @@
-package unicam.ids.HackHub.state;
+package unicam.ids.HackHub.model.state;
 
 import unicam.ids.HackHub.dto.requests.HackathonSubmissionEvaluationRequest;
 import unicam.ids.HackHub.model.Hackathon;
 import unicam.ids.HackHub.model.Submission;
 import unicam.ids.HackHub.model.Team;
-import unicam.ids.HackHub.strategy.WinnerStrategy;
+import unicam.ids.HackHub.model.declareWinner.WinnerStrategy;
 
 import java.util.List;
 

@@ -12,10 +12,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import unicam.ids.HackHub.dto.requests.*;
 import unicam.ids.HackHub.model.Hackathon;
-import unicam.ids.HackHub.model.Report;
 import unicam.ids.HackHub.model.Submission;
 import unicam.ids.HackHub.service.HackathonService;
-import unicam.ids.HackHub.strategy.HighestScoreStrategy;
+import unicam.ids.HackHub.model.declareWinner.HighestScoreStrategy;
 
 import java.util.List;
 
@@ -115,9 +114,9 @@ public class HackathonController {
                           "name": "Hackathon Innovazione 2026",
                           "place": "Camerino",
                           "regulation": "Lorem ipsum dolor sit amet...",
-                          "subscriptionDeadline": "2026-02-15",
-                          "startDate": "2026-03-01",
-                          "endDate": "2026-03-03",
+                          "subscriptionDeadline": "2026-04-01T23:59:59",
+                          "startDate": "2026-05-01T23:59:59",
+                          "endDate": "2026-05-03T23:59:59",
                           "reward": 5000.0,
                           "maxTeamSize": 5,
                           "isPublic": true
@@ -157,7 +156,7 @@ public class HackathonController {
                                     name = "Esempio iscrizione giudice",
                                     value = """
                 {
-                    "startDate": "2026-04-08 12:30"
+                    "startDate": "2026-04-08T23:59:59"
                 }
                 """
                             )

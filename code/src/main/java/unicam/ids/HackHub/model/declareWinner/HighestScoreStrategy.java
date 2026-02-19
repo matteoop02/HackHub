@@ -1,4 +1,4 @@
-package unicam.ids.HackHub.strategy;
+package unicam.ids.HackHub.model.declareWinner;
 
 import unicam.ids.HackHub.enums.SubmissionStatus;
 import unicam.ids.HackHub.model.Submission;

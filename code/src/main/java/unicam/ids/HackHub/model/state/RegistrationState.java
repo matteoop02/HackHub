@@ -1,16 +1,14 @@
-package unicam.ids.HackHub.state;
+package unicam.ids.HackHub.model.state;
 
-import unicam.ids.HackHub.dto.requests.CreateTeamSubmissionRequest;
 import unicam.ids.HackHub.dto.requests.HackathonSubmissionEvaluationRequest;
 import unicam.ids.HackHub.enums.SubmissionStatus;
-import unicam.ids.HackHub.exceptions.HackathonClosedException;
+import unicam.ids.HackHub.exceptions.InvalidHackathonStateException;
 import unicam.ids.HackHub.exceptions.TeamAlreadyRegisteredException;
 import unicam.ids.HackHub.exceptions.TeamTooLargeException;
 import unicam.ids.HackHub.model.Hackathon;
-import unicam.ids.HackHub.model.Report;
 import unicam.ids.HackHub.model.Submission;
 import unicam.ids.HackHub.model.Team;
-import unicam.ids.HackHub.strategy.WinnerStrategy;
+import unicam.ids.HackHub.model.declareWinner.WinnerStrategy;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,7 +19,7 @@ public class RegistrationState implements HackathonState {
     public void signTeam(Hackathon hackathon, Team team) {
             if (hackathon.getSubscriptionDeadline() != null
             && LocalDateTime.now().isAfter(hackathon.getSubscriptionDeadline())) {
-        throw new IllegalStateException("Iscrizioni chiuse: deadline superata");
+        throw new InvalidHackathonStateException("Iscrizioni chiuse: deadline superata");
     }
         if (team.getHackathon() != null)
             throw new TeamAlreadyRegisteredException("Il team è già iscritto a un hackathon");
@@ -38,7 +36,7 @@ public class RegistrationState implements HackathonState {
 
     @Override
     public void evaluateHackathonSubmission(HackathonSubmissionEvaluationRequest request, Submission submission) {
-        throw new IllegalStateException("hackathon non in valutazione");
+        throw new InvalidHackathonStateException("hackathon non in valutazione");
     }
 
     @Override
@@ -56,6 +54,6 @@ public class RegistrationState implements HackathonState {
 
     @Override
     public void declareWinner(Hackathon hackathon, List<Submission> submissions, WinnerStrategy strategy) {
-        throw new IllegalStateException("valutezioni non concluse");
+        throw new InvalidHackathonStateException("valutezioni non concluse");
     }
 }

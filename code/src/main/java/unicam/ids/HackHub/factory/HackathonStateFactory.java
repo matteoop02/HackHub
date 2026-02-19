@@ -1,7 +1,7 @@
 package unicam.ids.HackHub.factory;
 
 import unicam.ids.HackHub.enums.HackathonStatus;
-import unicam.ids.HackHub.state.*;
+import unicam.ids.HackHub.model.state.*;
 
 public class HackathonStateFactory {
 

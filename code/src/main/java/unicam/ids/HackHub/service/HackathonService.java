@@ -17,8 +17,8 @@ import unicam.ids.HackHub.model.Submission;
 import unicam.ids.HackHub.model.Team;
 import unicam.ids.HackHub.model.User;
 import unicam.ids.HackHub.repository.HackathonRepository;
-import unicam.ids.HackHub.state.HackathonState;
-import unicam.ids.HackHub.strategy.WinnerStrategy;
+import unicam.ids.HackHub.model.state.HackathonState;
+import unicam.ids.HackHub.model.declareWinner.WinnerStrategy;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -39,6 +39,8 @@ public class HackathonService {
     private TeamService teamService;
     @Autowired
     private PaymentService paymentService;
+    @Autowired
+    private EmailService emailService;
 
     // ----------------------- GET -----------------------
 
@@ -90,30 +92,6 @@ public class HackathonService {
                 .organizer(organizer)
                 .build();
         save(hackathon);
-    }
-
-    @Transactional
-    public void startHackathons(LocalDateTime now) {
-        List<Hackathon> toStart = hackathonRepository
-                .findByStateAndStartDateLessThanEqual(HackathonStatus.IN_ISCRIZIONE, now);
-
-        for (Hackathon h : toStart) {
-            h.setState(HackathonStatus.IN_CORSO);
-        }
-
-        hackathonRepository.saveAll(toStart);
-    }
-
-    @Transactional
-    public void moveHackathonsToEvaluation(LocalDateTime now) {
-        List<Hackathon> toEval = hackathonRepository
-                .findByStateAndEndDateLessThanEqual(HackathonStatus.IN_CORSO, now);
-
-        for (Hackathon h : toEval) {
-            h.setState(HackathonStatus.IN_VALUTAZIONE);
-        }
-
-        hackathonRepository.saveAll(toEval);
     }
 
     // ----------------------- SIGN/UNSUBSCRIBE TEAM TO HACKATHON -----------------------
@@ -262,4 +240,6 @@ public class HackathonService {
     public void save(Hackathon hackathon) {
         hackathonRepository.save(hackathon);
     }
+
+    public void saveAll(List<Hackathon> hackathons) { hackathonRepository.saveAll(hackathons); }
 }

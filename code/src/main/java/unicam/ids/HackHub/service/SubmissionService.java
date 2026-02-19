@@ -7,7 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 import unicam.ids.HackHub.dto.requests.CreateTeamSubmissionRequest;
 import unicam.ids.HackHub.dto.requests.HackathonSubmissionEvaluationRequest;
 import unicam.ids.HackHub.dto.requests.UpdateTeamSubmissionRequest;
-import unicam.ids.HackHub.enums.HackathonStatus;
 import unicam.ids.HackHub.enums.SubmissionStatus;
 import unicam.ids.HackHub.exceptions.ResourceNotFoundException;
 import unicam.ids.HackHub.factory.HackathonStateFactory;
@@ -16,7 +15,7 @@ import unicam.ids.HackHub.model.Submission;
 import unicam.ids.HackHub.model.Team;
 import unicam.ids.HackHub.model.User;
 import unicam.ids.HackHub.repository.SubmissionRepository;
-import unicam.ids.HackHub.state.HackathonState;
+import unicam.ids.HackHub.model.state.HackathonState;
 
 import java.time.LocalDateTime;
 import java.util.*;
