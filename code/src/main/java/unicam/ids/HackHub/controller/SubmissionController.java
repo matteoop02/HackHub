@@ -6,9 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import unicam.ids.HackHub.dto.requests.submission.CreateTeamSubmissionRequest;
-import unicam.ids.HackHub.dto.requests.submission.HackathonSubmissionEvaluationRequest;
-import unicam.ids.HackHub.dto.requests.submission.UpdateTeamSubmissionRequest;
+import unicam.ids.HackHub.dto.requests.submission.*;
 import unicam.ids.HackHub.model.Submission;
 import unicam.ids.HackHub.service.SubmissionService;
 import java.util.List;
@@ -33,9 +31,9 @@ public class SubmissionController {
     }
 
     @GetMapping("/staff/listByHackathon")
-    public ResponseEntity<List<Submission>> getSubmissionsListByHackathonName(@RequestParam @Valid String hackathonName) {
+    public ResponseEntity<List<Submission>> getSubmissionsListByHackathonName(@RequestBody @Valid SubmissionsListByHackathonRequest submissionsListByHackathonRequest) {
         try {
-            List<Submission> submissions = submissionService.getSubmissionsByHackathonName(hackathonName);
+            List<Submission> submissions = submissionService.getSubmissionsByHackathonName(submissionsListByHackathonRequest.hackathonName());
             return ResponseEntity.ok(submissions);
         }
         catch (Exception ex) {
@@ -44,9 +42,9 @@ public class SubmissionController {
     }
 
     @GetMapping("/staff/listByTeam")
-    public ResponseEntity<List<Submission>> getSubmissionsListByTeamName(@RequestParam @Valid String teamName) {
+    public ResponseEntity<List<Submission>> getSubmissionsListByTeamName(@RequestBody @Valid SubmissionsListByTeamRequest submissionsListByTeamRequest) {
         try {
-            List<Submission> submissions = submissionService.getSubmissionsByTeamName(teamName);
+            List<Submission> submissions = submissionService.getSubmissionsByTeamName(submissionsListByTeamRequest.teamName());
             return ResponseEntity.ok(submissions);
         }
         catch(Exception ex) {

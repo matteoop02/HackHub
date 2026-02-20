@@ -9,6 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import unicam.ids.HackHub.dto.requests.team.CreateTeamRequest;
+import unicam.ids.HackHub.dto.requests.team.JoinToTeamRequest;
+import unicam.ids.HackHub.dto.requests.team.LeaveTeamRequest;
+import unicam.ids.HackHub.dto.requests.team.RemoveMemberToTeamRequest;
 import unicam.ids.HackHub.dto.responses.TeamMemberResponse;
 import unicam.ids.HackHub.service.TeamService;
 
@@ -29,7 +32,7 @@ public class TeamController {
     )
     @ApiResponse(responseCode = "200", description = "Team registrato con successo")
     @ApiResponse(responseCode = "400", description = "Team non creato,errore")
-    public ResponseEntity<String> createTeam(Authentication authentication, @RequestBody @Valid CreateTeamRequest  createTeamRequest) {
+    public ResponseEntity<String> createTeam(Authentication authentication, @RequestBody @Valid CreateTeamRequest createTeamRequest) {
         try {
             teamService.createTeam(authentication, createTeamRequest);
             return ResponseEntity.ok("Team creato con successo");
@@ -48,9 +51,9 @@ public class TeamController {
     )
     @ApiResponse(responseCode = "200", description = "Partecipazione avvenuta con successo")
     @ApiResponse(responseCode = "400", description = "Errore nella richiesta o dati non validi")
-    public ResponseEntity<String> joinToTeam(Authentication authentication, @RequestParam @Valid String teamName) {
+    public ResponseEntity<String> joinToTeam(Authentication authentication, @RequestBody @Valid JoinToTeamRequest joinToTeamRequest) {
         try {
-            teamService.joinToTeam(authentication, teamName);
+            teamService.joinToTeam(authentication, joinToTeamRequest.teamName());
             return ResponseEntity.ok("Unione al team effettuata con successo");
         }
         catch(Exception ex) {
@@ -67,9 +70,9 @@ public class TeamController {
     )
     @ApiResponse(responseCode = "200", description = "Rimozione del membro avvenuta con successo")
     @ApiResponse(responseCode = "400", description = "Errore nella richiesta o dati non validi")
-    public ResponseEntity<String> removeMemberToTeam(Authentication authentication, @RequestParam @Valid String member) {
+    public ResponseEntity<String> removeMemberToTeam(Authentication authentication, @RequestBody @Valid RemoveMemberToTeamRequest removeMemberToTeamRequest) {
         try {
-            teamService.deleteMemberToTeam(authentication, member);
+            teamService.deleteMemberToTeam(authentication, removeMemberToTeamRequest.member());
             return ResponseEntity.ok("Membro rimosso con successo");
         }
         catch(Exception ex) {
@@ -86,9 +89,9 @@ public class TeamController {
     )
     @ApiResponse(responseCode = "200", description = "Partecipazione avvenuta con successo")
     @ApiResponse(responseCode = "400", description = "Errore nella richiesta o dati non validi")
-    public ResponseEntity<String> leaveTeam(Authentication authentication, @RequestParam @Valid String teamName) {
+    public ResponseEntity<String> leaveTeam(Authentication authentication, @RequestBody @Valid LeaveTeamRequest leaveTeamRequest) {
         try {
-            teamService.leaveTeam(authentication, teamName);
+            teamService.leaveTeam(authentication, leaveTeamRequest.teamName());
             return ResponseEntity.ok("La richiesta di lasciare il team è avvenuta con successo");
         }
         catch(Exception ex) {
