@@ -1,4 +1,4 @@
-package unicam.ids.HackHub.dto.requests;
+package unicam.ids.HackHub.dto.requests.invite;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Email;

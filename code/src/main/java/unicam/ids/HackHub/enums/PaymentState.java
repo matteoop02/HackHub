@@ -1,6 +1,6 @@
 package unicam.ids.HackHub.enums;
 
-public enum PaymentStatus {
+public enum PaymentState {
     PENDING,
     COMPLETED,
     FAILED

@@ -1,6 +1,6 @@
 package unicam.ids.HackHub.enums;
 
-public enum CallStatus {
+public enum CallState {
     PENDING,
     CONFIRMED,
     CANCELLED

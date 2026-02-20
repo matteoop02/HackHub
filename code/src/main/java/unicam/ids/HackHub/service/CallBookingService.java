@@ -4,13 +4,15 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import unicam.ids.HackHub.enums.CallStatus;
+import unicam.ids.HackHub.dto.requests.call.CallBookingRequest;
+import unicam.ids.HackHub.dto.requests.call.CancelCallRequest;
+import unicam.ids.HackHub.dto.requests.call.MentorCallsRequest;
+import unicam.ids.HackHub.dto.requests.call.TeamCallsRequest;
+import unicam.ids.HackHub.enums.CallState;
 import unicam.ids.HackHub.model.CallBooking;
 import unicam.ids.HackHub.model.Team;
 import unicam.ids.HackHub.model.User;
 import unicam.ids.HackHub.repository.CallBookingRepository;
-
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -23,36 +25,45 @@ public class CallBookingService {
     @Autowired
     private UserService userService;
 
+    public List<CallBooking> getBookingsForMentor(MentorCallsRequest mentorCallsRequest) {
+        return callBookingRepository.findByMentorAndStatus(userService.findUserByUsername(mentorCallsRequest.mentorUsername()), CallState.PENDING);
+    }
+
+    public List<CallBooking> getBookingsForTeam(TeamCallsRequest teamCallsRequest) {
+        return callBookingRepository.findByTeamAndStatus(teamService.findByName(teamCallsRequest.teamName()), CallState.PENDING);
+    }
+
     @Transactional
-    public CallBooking bookCall(Authentication authentication, String mentorUsername, LocalDateTime start, LocalDateTime end, String topic) {
+    public CallBooking bookCall(Authentication authentication, CallBookingRequest  callBookingRequest) {
         User leader = userService.findUserByUsername(authentication.getName());
         Team team = teamService.findByName(leader.getTeam().getName());
 
-        // Solo il leader può prenotare
-        if (!team.getTeamLeader().equals(leader)) {
+        if (!team.getTeamLeader().equals(leader))
             throw new IllegalArgumentException("Solo il leader del team può prenotare una call.");
-        }
 
-        User mentor = userService.findUserByUsername(mentorUsername);
+        User mentor = userService.findUserByUsername(callBookingRequest.mentorUsername());
 
         CallBooking booking = CallBooking.builder()
                 .team(team)
                 .mentor(mentor)
-                .startTime(start)
-                .endTime(end)
-                .topic(topic)
-                .status(CallStatus.PENDING)
+                .startTime(callBookingRequest.startTime())
+                .endTime(callBookingRequest.endTime())
+                .topic(callBookingRequest.topic())
+                .status(CallState.PENDING)
                 .build();
 
         return save(booking);
     }
 
-    public List<CallBooking> getBookingsForMentor(String mentorUsername) {
-        return callBookingRepository.findByMentorAndStatus(userService.findUserByUsername(mentorUsername), CallStatus.PENDING);
-    }
+    @Transactional
+    public CallBooking cancelCall(Authentication authentication, CancelCallRequest cancelCallRequest) {
+        User leader = userService.findUserByUsername(authentication.getName());
+        User mentor = userService.findUserByUsername(cancelCallRequest.mentorUsername());
 
-    public List<CallBooking> getBookingsForTeam(String teamName) {
-        return callBookingRepository.findByTeamAndStatus(teamService.findByName(teamName), CallStatus.PENDING);
+        CallBooking callBooking = findByTeamAndMentor(leader.getTeam(), mentor);
+
+        callBooking.setStatus(CallState.CANCELLED);
+        return save(callBooking);
     }
 
     public CallBooking findByTeamAndMentor(Team team, User mentor){
@@ -64,15 +75,5 @@ public class CallBookingService {
         return callBookingRepository.save(callBooking);
     }
 
-    @Transactional
-    public CallBooking cancelCall(Authentication authentication, String mentorUsername) {
-        User leader = userService.findUserByUsername(authentication.getName());
-        User mentor = userService.findUserByUsername(mentorUsername);
-
-        CallBooking callBooking = findByTeamAndMentor(leader.getTeam(), mentor);
-
-        callBooking.setStatus(CallStatus.CANCELLED);
-        return save(callBooking);
-    }
 
 }

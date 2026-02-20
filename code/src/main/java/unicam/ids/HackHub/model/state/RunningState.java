@@ -1,6 +1,6 @@
 package unicam.ids.HackHub.model.state;
 
-import unicam.ids.HackHub.dto.requests.HackathonSubmissionEvaluationRequest;
+import unicam.ids.HackHub.dto.requests.submission.HackathonSubmissionEvaluationRequest;
 import unicam.ids.HackHub.exceptions.InvalidHackathonStateException;
 import unicam.ids.HackHub.model.Hackathon;
 import unicam.ids.HackHub.model.Submission;

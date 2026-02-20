@@ -1,11 +1,11 @@
 package unicam.ids.HackHub.factory;
 
-import unicam.ids.HackHub.enums.HackathonStatus;
+import unicam.ids.HackHub.enums.HackathonState;
 import unicam.ids.HackHub.model.state.*;
 
 public class HackathonStateFactory {
 
-    public static HackathonState from(HackathonStatus status) {
+    public static unicam.ids.HackHub.model.state.HackathonState from(HackathonState status) {
         return switch(status) {
             case IN_ISCRIZIONE -> new RegistrationState();
             case IN_CORSO -> new RunningState();

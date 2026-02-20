@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.*;
-import unicam.ids.HackHub.enums.SubmissionStatus;
+import unicam.ids.HackHub.enums.SubmissionState;
 
 import java.time.LocalDateTime;
 
@@ -36,7 +36,7 @@ public class Submission {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "State", nullable = false)
-    private SubmissionStatus state;
+    private SubmissionState state;
 
     @DecimalMin("0.0")
     @DecimalMax("10.0")

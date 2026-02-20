@@ -3,8 +3,7 @@ package unicam.ids.HackHub.scheduler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import unicam.ids.HackHub.enums.HackathonStatus;
+import unicam.ids.HackHub.enums.HackathonState;
 import unicam.ids.HackHub.model.Hackathon;
 import unicam.ids.HackHub.service.HackathonService;
 
@@ -26,22 +25,22 @@ public class HackathonStateScheduler {
     }
 
     public void subscriptionToStartHackathons() {
-        changeState(HackathonStatus.IN_ISCRIZIONE);
+        changeState(HackathonState.IN_ISCRIZIONE);
     }
 
     public void startToEvaluationHackathons() {
-        changeState(HackathonStatus.IN_CORSO);
+        changeState(HackathonState.IN_CORSO);
     }
 
-    public void changeState(HackathonStatus status) {
+    public void changeState(HackathonState status) {
         List<Hackathon> hackathons = hackathonService.getHackathons();
 
         for (Hackathon h : hackathons) {
             if (status.equals(h.getState()) && h.getStartDate().equals(LocalDateTime.now()))
-                h.setState(HackathonStatus.IN_CORSO);
+                h.setState(HackathonState.IN_CORSO);
 
             if (status.equals(h.getState()) && h.getEndDate().equals(LocalDateTime.now()))
-                h.setState(HackathonStatus.IN_VALUTAZIONE);
+                h.setState(HackathonState.IN_VALUTAZIONE);
         }
 
         hackathonService.saveAll(hackathons);

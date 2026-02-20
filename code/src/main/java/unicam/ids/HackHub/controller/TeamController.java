@@ -8,12 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import unicam.ids.HackHub.dto.requests.CreateTeamRequest;
+import unicam.ids.HackHub.dto.requests.team.CreateTeamRequest;
 import unicam.ids.HackHub.dto.responses.TeamMemberResponse;
 import unicam.ids.HackHub.service.TeamService;
-import unicam.ids.HackHub.model.User;
+
 import java.util.List;
-import unicam.ids.HackHub.dto.responses.TeamMemberResponse;
 
 
 @RestController

@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import unicam.ids.HackHub.dto.requests.*;
+import unicam.ids.HackHub.dto.requests.hackathon.*;
 import unicam.ids.HackHub.model.Hackathon;
 import unicam.ids.HackHub.model.Submission;
 import unicam.ids.HackHub.service.HackathonService;
@@ -66,11 +66,9 @@ public class HackathonController {
     @ApiResponse(responseCode = "400", description = "Errore nella richiesta o dati non validi")
     public ResponseEntity<Hackathon> getHackathonInfo(Authentication authentication, @RequestBody @Valid HackathonInfoRequest hackathonInfoRequest) {
         try {
-            // Se l'utente è autenticato, restituisci tutti gli hackathon sia privati che pubblici
             if (authentication != null && authentication.isAuthenticated())
                 return ResponseEntity.ok(hackathonService.findHackathonInfo(hackathonInfoRequest.id()));
 
-            // Altrimenti restituisci solo quelli pubblici
             return ResponseEntity.ok(hackathonService.findPublicHackathonInfo(hackathonInfoRequest.id()));
         }
         catch(Exception ex) {
@@ -165,7 +163,7 @@ public class HackathonController {
     )
     @ApiResponse(responseCode = "200", description = "Data di inzio aggiornata con successo")
     @ApiResponse(responseCode = "400", description = "Errore durante l'aggiornamento della data")
-    public ResponseEntity<String> updateStartDate(@RequestBody @Valid UpdateHackathonStartDateRequest  updateHackathonStartDateRequest) {
+    public ResponseEntity<String> updateStartDate(@RequestBody @Valid UpdateHackathonStartAndEndDateRequest updateHackathonStartDateRequest) {
         try {
             hackathonService.updateStartDate(updateHackathonStartDateRequest);
             return ResponseEntity.ok("Data aggiornata con successo");
@@ -248,8 +246,8 @@ public class HackathonController {
                                     name = "Esempio iscrizione giudice",
                                     value = """
                 {
-                    "judgeUsername": "Andrea"
                     "hackathonName": "Hackathon Innovazione 2026"
+                    "judgeUsername": "Andrea"
                 }
                 """
                             )
@@ -258,12 +256,9 @@ public class HackathonController {
     )
     @ApiResponse(responseCode = "200", description = "Giudice iscritto con successo all'hackathon")
     @ApiResponse(responseCode = "400", description = "Errore durante l'iscrizione del giudice")
-   public ResponseEntity<String> setJudge(
-        @RequestParam String hackathonName,
-        @RequestBody @Valid String judgeUsername
-) {
+   public ResponseEntity<String> setJudge(@RequestBody @Valid SetJudgeToHackathonRequest setJudgeToHackathonRequest) {
     try {
-        hackathonService.setJudge(hackathonName, judgeUsername);
+        hackathonService.setJudge(setJudgeToHackathonRequest);
         return ResponseEntity.ok("Giudice iscritto all'hackathon con successo");
     } catch(Exception ex) {
         return ResponseEntity.badRequest().body("Iscrizione del giudice all'hackathon fallita! " + ex.getMessage());
@@ -271,7 +266,7 @@ public class HackathonController {
 }
 
     @PostMapping("/organizzatore/removeJudge")
-@Operation(
+    @Operation(
         summary = "Rimozione del giudice da un Hackathon",
         description = """
         Permette ad un organizzatore di rimuovere il giudice assegnato ad un hackathon.
@@ -293,14 +288,14 @@ public class HackathonController {
 )
 @ApiResponse(responseCode = "200", description = "Giudice rimosso con successo dall'hackathon")
 @ApiResponse(responseCode = "400", description = "Errore durante la rimozione del giudice")
-public ResponseEntity<String> removeJudge(@RequestParam String hackathonName) {
-    try {
-        hackathonService.removeJudge(hackathonName);
-        return ResponseEntity.ok("Giudice rimosso dall'hackathon con successo");
-    } catch (Exception ex) {
-        return ResponseEntity.badRequest().body("Rimozione del giudice fallita! " + ex.getMessage());
+    public ResponseEntity<String> removeJudge(@RequestBody @Valid RemoveJudgeFromHackathonRequest removeJudgeFromHackathonRequest) {
+        try {
+            hackathonService.removeJudge(removeJudgeFromHackathonRequest);
+            return ResponseEntity.ok("Giudice rimosso dall'hackathon con successo");
+        } catch (Exception ex) {
+            return ResponseEntity.badRequest().body("Rimozione del giudice fallita! " + ex.getMessage());
+        }
     }
-}
 
     @PostMapping("/organizzatore/addMentor")
     @Operation(
@@ -328,12 +323,9 @@ public ResponseEntity<String> removeJudge(@RequestParam String hackathonName) {
     )
     @ApiResponse(responseCode = "200", description = "Mentore iscritto con successo all'hackathon")
     @ApiResponse(responseCode = "400", description = "Errore durante l'iscrizione del mentore")
-   public ResponseEntity<String> addMentor(
-        @RequestParam String hackathonName,
-        @RequestBody @Valid String mentorUsername
-) {
+   public ResponseEntity<String> addMentor(@RequestBody @Valid AddMentorToHackathonRequest addMentorToHackathonRequest ) {
     try {
-        hackathonService.addMentor(hackathonName, mentorUsername);
+        hackathonService.addMentor(addMentorToHackathonRequest);
         return ResponseEntity.ok("Mentore iscritto all'hackathon con successo");
     } catch(Exception ex) {
         return ResponseEntity.badRequest().body("Iscrizione del mentore all'hackathon fallita! " + ex.getMessage());
@@ -366,12 +358,9 @@ public ResponseEntity<String> removeJudge(@RequestParam String hackathonName) {
     )
     @ApiResponse(responseCode = "200", description = "Mentore rimosso con successo all'hackathon")
     @ApiResponse(responseCode = "400", description = "Errore durante la rimozione del mentore")
-   public ResponseEntity<String> removeMentor(
-        @RequestParam String hackathonName,
-        @RequestBody @Valid String mentorUsername
-) {
+   public ResponseEntity<String> removeMentor(@RequestBody @Valid RemoveMentorFromHackathonRequest removeMentorFromHackathonRequest) {
     try {
-        hackathonService.removeMentor(hackathonName, mentorUsername);
+        hackathonService.removeMentor(removeMentorFromHackathonRequest);
         return ResponseEntity.ok("Mentore rimosso dall'hackathon con successo");
     } catch(Exception ex) {
         return ResponseEntity.badRequest().body("Rimozione del mentore all'hackathon fallita! " + ex.getMessage());
@@ -381,7 +370,7 @@ public ResponseEntity<String> removeJudge(@RequestParam String hackathonName) {
     //--------------------------------- VINCITORE E PREMIO ---------------------------------
 
     @PostMapping("/organizzatore/declareWinner")
-@Operation(
+    @Operation(
         summary = "Dichiara il vincitore dell'hackathon",
         description = "Proclama automaticamente il vincitore in base al punteggio più alto",
         requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -401,12 +390,12 @@ public ResponseEntity<String> removeJudge(@RequestParam String hackathonName) {
 )
 @ApiResponse(responseCode = "200", description = "Vincitore proclamato con successo")
 @ApiResponse(responseCode = "400", description = "Richiesta non valida")
-public ResponseEntity<String> declareWinner(@RequestBody @Valid DeclareWinnerRequest request) {
-    try {
-        hackathonService.declareWinner(request.hackathonName(), new HighestScoreStrategy());
-        return ResponseEntity.ok("Vincitore proclamato automaticamente in base al punteggio più alto!");
-    } catch (Exception ex) {
-        return ResponseEntity.badRequest().body("Richiesta non valida! " + ex.getMessage());
+    public ResponseEntity<String> declareWinner(@RequestBody @Valid DeclareWinnerRequest request) {
+        try {
+            hackathonService.declareWinner(request.hackathonName(), new HighestScoreStrategy());
+            return ResponseEntity.ok("Vincitore proclamato automaticamente in base al punteggio più alto!");
+        } catch (Exception ex) {
+            return ResponseEntity.badRequest().body("Richiesta non valida! " + ex.getMessage());
+        }
     }
-}
 }

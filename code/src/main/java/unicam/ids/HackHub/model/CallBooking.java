@@ -3,7 +3,7 @@ package unicam.ids.HackHub.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import unicam.ids.HackHub.enums.CallStatus;
+import unicam.ids.HackHub.enums.CallState;
 
 import java.time.LocalDateTime;
 
@@ -37,5 +37,5 @@ public class CallBooking {
     private String topic;
 
     @Enumerated(EnumType.STRING)
-    private CallStatus status = CallStatus.PENDING;
+    private CallState status = CallState.PENDING;
 }

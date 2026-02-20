@@ -1,17 +1,13 @@
 package unicam.ids.HackHub.service;
 
-import jakarta.validation.constraints.Email;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import unicam.ids.HackHub.dto.requests.ReportRequest;
-import unicam.ids.HackHub.enums.ReportType;
-import unicam.ids.HackHub.model.Hackathon;
+import unicam.ids.HackHub.dto.requests.report.ReportToOrganizerRequest;
 import unicam.ids.HackHub.model.Report;
 import unicam.ids.HackHub.model.Team;
 import unicam.ids.HackHub.model.User;
 import unicam.ids.HackHub.repository.ReportRepository;
-import unicam.ids.HackHub.repository.UserRepository;
 
 @Service
 public class ReportService {
@@ -25,7 +21,7 @@ public class ReportService {
     @Autowired
     private EmailService emailService;
 
-    public void reportRequest(Authentication authentication, ReportRequest request) {
+    public void reportRequest(Authentication authentication, ReportToOrganizerRequest request) {
         User mentor = userService.findUserByUsername(authentication.getName());
         User organizer = userService.findUserByUsername(request.organizerUsername());
         Team team = teamService.findByName(request.teamName());

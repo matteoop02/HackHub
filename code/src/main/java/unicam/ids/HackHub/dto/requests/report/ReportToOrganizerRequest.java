@@ -1,10 +1,10 @@
-package unicam.ids.HackHub.dto.requests;
+package unicam.ids.HackHub.dto.requests.report;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import unicam.ids.HackHub.enums.ReportType;
 
-public record ReportRequest (
+public record ReportToOrganizerRequest(
 
         @NotEmpty(message = "Il nome del team deve essere specificato!")
         String teamName,

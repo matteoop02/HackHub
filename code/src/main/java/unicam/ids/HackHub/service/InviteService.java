@@ -1,10 +1,8 @@
 package unicam.ids.HackHub.service;
 
 import org.springframework.security.core.Authentication;
-import unicam.ids.HackHub.dto.requests.InsideInviteRequest;
-import unicam.ids.HackHub.dto.requests.OutsideInviteRequest;
-import unicam.ids.HackHub.dto.requests.RegisterFromInviteRequest;
-import unicam.ids.HackHub.enums.InviteStatus;
+import unicam.ids.HackHub.dto.requests.invite.*;
+import unicam.ids.HackHub.enums.InviteState;
 import unicam.ids.HackHub.exceptions.ResourceNotFoundException;
 import unicam.ids.HackHub.model.*;
 import unicam.ids.HackHub.factory.InviteFactory;
@@ -38,7 +36,7 @@ public class InviteService {
         if(existsBySenderUsernameAndRecipientEmailAndStatus(
                 userService.findUserByUsername(authentication.getName()),
                 outsideInviteRequest.recipientEmail(),
-                InviteStatus.PENDING))
+                InviteState.PENDING))
             throw new IllegalStateException("Esiste già un invito pendente per " + outsideInviteRequest.recipientEmail() + "da parte di " + authentication.getName());
 
         User senderUser = userService.findUserByUsername(authentication.getName());
@@ -53,14 +51,6 @@ public class InviteService {
         return saved;
     }
 
-//    @Transactional
-//    public void acceptOutsideInvite(String token) {
-//        InviteOutsidePlatform invite = findInviteByToken(token);
-//
-//        invite.accept();
-//        outsideInviteRepository.save(invite);
-//    }
-
     @Transactional
     public void acceptInviteAndRegisterUser(RegisterFromInviteRequest request) {
 
@@ -69,28 +59,28 @@ public class InviteService {
         if (invite.isExpired())
             throw new IllegalStateException("L'invito è scaduto");
 
-        if (invite.getStatus() != InviteStatus.PENDING)
+        if (invite.getStatus() != InviteState.PENDING)
             throw new IllegalStateException("Invito non più valido");
 
-           if (userService.existsUserByUsername(request.username()))
-        throw new IllegalArgumentException("Username già esistente: " + request.username());
+       if (userService.existsUserByUsername(request.username()))
+            throw new IllegalArgumentException("Username già esistente: " + request.username());
 
-        try {
-        userService.findUserByEmail(invite.getRecipientEmail());
-        throw new IllegalArgumentException("Email già registrata: " + invite.getRecipientEmail());
-    } catch (Exception ignored) {
-    }
+       try {
+            userService.findUserByEmail(invite.getRecipientEmail());
+            throw new IllegalArgumentException("Email già registrata: " + invite.getRecipientEmail());
+        } catch (Exception ignored) {
+        }
 
         //Crea utente sulla piattaforma
         User user = User.builder()
-                .username(request.username())                      
+                .username(request.username())
                 .email(invite.getRecipientEmail())
                 .name(request.name())
                 .surname(request.surname())
-                .password(passwordEncoder.encode(request.password())) 
-                .dateOfBirth(request.dateOfBirth())                
-                .role(userRoleService.findUserRoleById(1L))         
-                .isDeleted(false)                          
+                .password(passwordEncoder.encode(request.password()))
+                .dateOfBirth(request.dateOfBirth())
+                .role(userRoleService.findUserRoleById(1L))
+                .isDeleted(false)
                 .build();
 
         userService.save(user);
@@ -100,26 +90,12 @@ public class InviteService {
     }
 
     @Transactional
-    public void rejectOutsideInvite(String token) {
-        InviteOutsidePlatform invite = findInviteByToken(token);
+    public void rejectOutsideInvite(RejectOutsideInviteRequest rejectOutsideInviteRequest) {
+        InviteOutsidePlatform invite = findInviteByToken(rejectOutsideInviteRequest.token());
 
         invite.reject();
         outsideInviteRepository.save(invite);
     }
-
-   @Transactional
-public void cancelOutsideInvite(Authentication authentication, String token) {
-    InviteOutsidePlatform invite = findInviteByToken(token);
-
-    // SOLO il mittente può cancellare
-    if (!invite.getSenderUser().getUsername().equals(authentication.getName())) {
-        throw new IllegalArgumentException("Non sei autorizzato a cancellare questo invito");
-    }
-
-    invite.cancel();
-    outsideInviteRepository.save(invite);
-}
-
 
     //------------------------------- INSIDE INVITE MANAGE -------------------------------
 
@@ -130,7 +106,7 @@ public void cancelOutsideInvite(Authentication authentication, String token) {
         User recipientUser = userService.findUserByUsername(insideInviteRequest.recipientUsername());
 
         // Verifica che non ci sia già un invito pendente per un dato utente da un dato team
-        if (existsByRecipientUserAndTeamAndStatus(recipientUser, senderUser.getTeam(), InviteStatus.PENDING))
+        if (existsByRecipientUserAndTeamAndStatus(recipientUser, senderUser.getTeam(), InviteState.PENDING))
             throw new IllegalStateException("Esiste già un invito pendente per questo utente");
 
         //Carico il ruolo
@@ -146,8 +122,8 @@ public void cancelOutsideInvite(Authentication authentication, String token) {
     }
 
     @Transactional
-    public void acceptTeamInvite(Authentication authentication, Long inviteId) {
-        InviteInsidePlatform invite = findInviteById(inviteId);
+    public void acceptTeamInvite(Authentication authentication, AcceptTeamInvite acceptTeamInvite) {
+        InviteInsidePlatform invite = findInviteById(acceptTeamInvite.inviteId());
 
         if (!invite.getRecipientUser().getUsername().equals(authentication.getName())) {
             throw new IllegalArgumentException("Non sei autorizzato ad accettare questo invito");
@@ -173,38 +149,27 @@ public void cancelOutsideInvite(Authentication authentication, String token) {
         notificationService.notifyInviteRejected(invite);
     }
 
-    @Transactional
-    public void cancelTeamInvite(Authentication authentication, Long inviteId) {
-        InviteInsidePlatform invite = findInviteById(inviteId);
-
-        if (!invite.getSenderUser().getUsername().equals(authentication.getName()))
-            throw new IllegalArgumentException("Non sei autorizzato a cancellare questo invito");
-
-        invite.cancel();
-        insideInviteRepository.save(invite);
-    }
-
     //------------------------------- FIND INVITE -------------------------------
 
     @Transactional(readOnly = true)
     public List<InviteInsidePlatform> findPendingInvitesForUser(Authentication authentication) {
-        return insideInviteRepository.findByRecipientUserAndStatus(userService.findUserByUsername(authentication.getName()), InviteStatus.PENDING);
+        return insideInviteRepository.findByRecipientUserAndStatus(userService.findUserByUsername(authentication.getName()), InviteState.PENDING);
     }
 
     @Transactional(readOnly = true)
     public List<InviteInsidePlatform> findTeamInvites(Authentication authentication) {
         Team team = teamService.findByName(userService.findUserByUsername(authentication.getName()).getTeam().getName());
-        return insideInviteRepository.findByTeamAndStatus(team, InviteStatus.PENDING);
+        return insideInviteRepository.findByTeamAndStatus(team, InviteState.PENDING);
     }
 
     public List<Invite> findEmailInvites(String email) {
         // inside invites
         List<InviteInsidePlatform> inside = insideInviteRepository
-                .findByRecipientUserAndStatus(userService.findUserByEmail(email), InviteStatus.PENDING);
+                .findByRecipientUserAndStatus(userService.findUserByEmail(email), InviteState.PENDING);
 
         // outside invites
         List<InviteOutsidePlatform> outside = outsideInviteRepository
-                .findByRecipientEmailAndStatus(email, InviteStatus.PENDING);
+                .findByRecipientEmailAndStatus(email, InviteState.PENDING);
 
         List<Invite> allInvites = new ArrayList<>();
         allInvites.addAll(inside);
@@ -228,12 +193,12 @@ public void cancelOutsideInvite(Authentication authentication, String token) {
     }
 
     @Transactional
-    public boolean existsByRecipientUserAndTeamAndStatus(User recipientUser, Team team, InviteStatus inviteStatus) {
+    public boolean existsByRecipientUserAndTeamAndStatus(User recipientUser, Team team, InviteState inviteStatus) {
         return insideInviteRepository.existsByRecipientUserAndTeamAndStatus(recipientUser, team, inviteStatus);
     }
 
     @Transactional
-    public boolean existsBySenderUsernameAndRecipientEmailAndStatus(User senderUser, String recipientEmail, InviteStatus inviteStatus) {
+    public boolean existsBySenderUsernameAndRecipientEmailAndStatus(User senderUser, String recipientEmail, InviteState inviteStatus) {
         return outsideInviteRepository.existsBySenderUserAndRecipientEmailAndStatus(senderUser, recipientEmail, inviteStatus);
     }
 }

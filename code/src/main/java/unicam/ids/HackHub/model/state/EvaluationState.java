@@ -1,8 +1,8 @@
 package unicam.ids.HackHub.model.state;
 
-import unicam.ids.HackHub.dto.requests.HackathonSubmissionEvaluationRequest;
-import unicam.ids.HackHub.enums.HackathonStatus;
-import unicam.ids.HackHub.enums.SubmissionStatus;
+import unicam.ids.HackHub.dto.requests.submission.HackathonSubmissionEvaluationRequest;
+import unicam.ids.HackHub.enums.HackathonState;
+import unicam.ids.HackHub.enums.SubmissionState;
 import unicam.ids.HackHub.exceptions.InvalidHackathonStateException;
 import unicam.ids.HackHub.model.Hackathon;
 import unicam.ids.HackHub.model.Submission;
@@ -11,7 +11,7 @@ import unicam.ids.HackHub.model.declareWinner.WinnerStrategy;
 
 import java.util.List;
 
-public class EvaluationState implements HackathonState {
+public class EvaluationState implements unicam.ids.HackHub.model.state.HackathonState {
     @Override
     public void signTeam(Hackathon hackathon, Team team) {
         throw new InvalidHackathonStateException("hackathon in valutazione");
@@ -26,7 +26,7 @@ public class EvaluationState implements HackathonState {
     public void evaluateHackathonSubmission(HackathonSubmissionEvaluationRequest request, Submission submission) {
         submission.setScore(request.score());
         submission.setComment(request.comment());
-        submission.setState(SubmissionStatus.VALUTATA);
+        submission.setState(SubmissionState.VALUTATA);
     }
 
     @Override
@@ -38,6 +38,6 @@ public class EvaluationState implements HackathonState {
     public void declareWinner(Hackathon hackathon, List<Submission> submissions, WinnerStrategy strategy) {
         Team winnerTeam = strategy.calculateWinner(submissions);
         hackathon.setTeamWinner(winnerTeam);
-        hackathon.setState(HackathonStatus.CONCLUSO);
+        hackathon.setState(HackathonState.CONCLUSO);
     }
 }

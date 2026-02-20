@@ -1,11 +1,11 @@
 package unicam.ids.HackHub.dto.responses;
 
-import unicam.ids.HackHub.enums.PaymentStatus;
+import unicam.ids.HackHub.enums.PaymentState;
 import java.time.LocalDateTime;
 
 public record PaymentStatusResponse(
         boolean paymentExists,
-        PaymentStatus status,
+        PaymentState status,
         String receivingTeamName,
         String processedByUsername,
         LocalDateTime paymentDate,

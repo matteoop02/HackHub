@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import unicam.ids.HackHub.dto.responses.PaymentStatusResponse;
-import unicam.ids.HackHub.enums.PaymentStatus;
+import unicam.ids.HackHub.enums.PaymentState;
 import unicam.ids.HackHub.model.*;
 import unicam.ids.HackHub.repository.PaymentRepository;
 
@@ -33,7 +33,7 @@ public class PaymentService {
                 .hackathon(hackathon)
                 .receivingTeam(winner)
                 .processedBy(organizer)
-                .status(PaymentStatus.COMPLETED)
+                .status(PaymentState.COMPLETED)
                 .build();
 
         save(payment);

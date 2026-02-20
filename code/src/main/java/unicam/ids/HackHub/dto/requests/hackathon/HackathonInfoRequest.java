@@ -1,4 +1,4 @@
-package unicam.ids.HackHub.dto.requests;
+package unicam.ids.HackHub.dto.requests.hackathon;
 
 import jakarta.validation.constraints.NotEmpty;
 

@@ -1,6 +1,5 @@
-package unicam.ids.HackHub.dto.requests;
+package unicam.ids.HackHub.dto.requests.submission;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.security.core.Authentication;

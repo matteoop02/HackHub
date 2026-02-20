@@ -29,7 +29,6 @@ public class AuthController {
         this.authService = authService;
     }
 
-    // Registra un nuovo utente
     @PostMapping("/register")
     @SecurityRequirements()
     @Operation(
@@ -89,7 +88,6 @@ public class AuthController {
     @ApiResponse(responseCode = "200", description = "Login effettuato con successo, token restituito")
     @ApiResponse(responseCode = "401", description = "Credenziali non valide")
     public ResponseEntity<AuthResponse> login(@RequestBody @Valid LoginUserRequest loginRequest) {
-        // Chiama il service che gestisce autenticazione e generazione del token
         AuthResponse response = authService.login(loginRequest);
         return ResponseEntity.ok(response);
     }

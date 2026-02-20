@@ -5,11 +5,9 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import unicam.ids.HackHub.dto.requests.CreateHackathonRequest;
-import unicam.ids.HackHub.dto.requests.SignTeamRequest;
-import unicam.ids.HackHub.dto.requests.UpdateHackathonStartDateRequest;
+import unicam.ids.HackHub.dto.requests.hackathon.*;
 import unicam.ids.HackHub.dto.responses.PaymentStatusResponse;
-import unicam.ids.HackHub.enums.HackathonStatus;
+import unicam.ids.HackHub.enums.HackathonState;
 import unicam.ids.HackHub.exceptions.*;
 import unicam.ids.HackHub.factory.HackathonStateFactory;
 import unicam.ids.HackHub.model.Hackathon;
@@ -17,7 +15,6 @@ import unicam.ids.HackHub.model.Submission;
 import unicam.ids.HackHub.model.Team;
 import unicam.ids.HackHub.model.User;
 import unicam.ids.HackHub.repository.HackathonRepository;
-import unicam.ids.HackHub.model.state.HackathonState;
 import unicam.ids.HackHub.model.declareWinner.WinnerStrategy;
 
 import java.time.Duration;
@@ -88,7 +85,7 @@ public class HackathonService {
                 .reward(request.reward())
                 .maxTeamSize(request.maxTeamSize())
                 .isPublic(request.isPublic())
-                .state(HackathonStatus.IN_ISCRIZIONE)
+                .state(HackathonState.IN_ISCRIZIONE)
                 .organizer(organizer)
                 .build();
         save(hackathon);
@@ -107,7 +104,7 @@ public class HackathonService {
 
         Hackathon hackathon = findHackathonByName(request.hackathonName());
 
-        HackathonState hackathonState = HackathonStateFactory.from(hackathon.getState());
+        unicam.ids.HackHub.model.state.HackathonState hackathonState = HackathonStateFactory.from(hackathon.getState());
         hackathonState.signTeam(hackathon, team);
 
         save(hackathon);
@@ -118,7 +115,7 @@ public class HackathonService {
         User leader = userService.findUserByUsername(authentication.getName());
         Team team = teamService.findByName(leader.getTeam().getName());
         Hackathon hackathon = findHackathonByName(team.getHackathon().getName());
-        HackathonState hackathonState = HackathonStateFactory.from(hackathon.getState());
+        unicam.ids.HackHub.model.state.HackathonState hackathonState = HackathonStateFactory.from(hackathon.getState());
         hackathonState.unsubscribeTeamToHackathon(hackathon, team);
         save(hackathon);
     }
@@ -173,15 +170,15 @@ public class HackathonService {
     // ----------------------- HELPER -----------------------
 
     @Transactional
-    public void setJudge(String hackathonName, String judgeUsername) {
-        Hackathon hackathon = findHackathonByName(hackathonName);
-        hackathon.setJudge(userService.findUserByUsername(judgeUsername));
+    public void setJudge(SetJudgeToHackathonRequest setJudgeToHackathonRequest) {
+        Hackathon hackathon = findHackathonByName(setJudgeToHackathonRequest.hackathonName());
+        hackathon.setJudge(userService.findUserByUsername(setJudgeToHackathonRequest.judgeUsername()));
         hackathonRepository.save(hackathon);
     }
 
     @Transactional
-    public void removeJudge(String hackathonName) {
-        Hackathon hackathon = findHackathonByName(hackathonName);
+    public void removeJudge(RemoveJudgeFromHackathonRequest removeJudgeFromHackathonRequest) {
+        Hackathon hackathon = findHackathonByName(removeJudgeFromHackathonRequest.hackathonName());
         if (hackathon.getJudge() == null) {
             throw new IllegalArgumentException("Nessun giudice assegnato a questo hackathon");
         }
@@ -190,21 +187,21 @@ public class HackathonService {
     }
 
     @Transactional
-    public void addMentor(String hackathonName, String mentorUsername) {
-        Hackathon hackathon = findHackathonByName(hackathonName);
-        hackathon.getMentors().add(userService.findUserByUsername(mentorUsername));
+    public void addMentor(AddMentorToHackathonRequest addMentorToHackathonRequest) {
+        Hackathon hackathon = findHackathonByName(addMentorToHackathonRequest.hackathonName());
+        hackathon.getMentors().add(userService.findUserByUsername(addMentorToHackathonRequest.mentorUsername()));
         hackathonRepository.save(hackathon);
     }
 
     @Transactional
-    public void removeMentor(String hackathonName, String mentorUsername) {
-        Hackathon hackathon = findHackathonByName(hackathonName);
-        hackathon.getMentors().remove(userService.findUserByUsername(mentorUsername));
+    public void removeMentor(RemoveMentorFromHackathonRequest removeMentorFromHackathonRequest) {
+        Hackathon hackathon = findHackathonByName(removeMentorFromHackathonRequest.hackathonName());
+        hackathon.getMentors().remove(userService.findUserByUsername(removeMentorFromHackathonRequest.mentorUsername()));
         hackathonRepository.save(hackathon);
     }
 
     @Transactional
-    public void updateStartDate(UpdateHackathonStartDateRequest request) {
+    public void updateStartDate(UpdateHackathonStartAndEndDateRequest request) {
         Hackathon hackathon = findHackathonByName(request.hackathonName());
 
         LocalDateTime newStart = request.startDate();
@@ -217,10 +214,6 @@ public class HackathonService {
             newEnd = newStart.plus(diff);
         }
 
-        if (!newStart.isBefore(newEnd)) {
-            throw new IllegalArgumentException("La data di inizio deve essere antecedente alla data di fine");
-        }
-
         hackathon.setStartDate(newStart);
         hackathon.setEndDate(newEnd);
 
@@ -231,7 +224,7 @@ public class HackathonService {
     public void declareWinner(String hackathonName, WinnerStrategy strategy) {
         Hackathon hackathon = findHackathonByName(hackathonName);
         List<Submission> submissions = submissionService.getSubmissionsByHackathonName(hackathon.getName());
-        HackathonState hackathonState = HackathonStateFactory.from(hackathon.getState());
+        unicam.ids.HackHub.model.state.HackathonState hackathonState = HackathonStateFactory.from(hackathon.getState());
         hackathonState.declareWinner(hackathon, submissions, strategy);
         save(hackathon);
         paymentService.payWinner(hackathon, hackathon.getOrganizer());

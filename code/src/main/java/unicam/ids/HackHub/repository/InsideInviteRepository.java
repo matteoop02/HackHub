@@ -1,6 +1,6 @@
 package unicam.ids.HackHub.repository;
 
-import unicam.ids.HackHub.enums.InviteStatus;
+import unicam.ids.HackHub.enums.InviteState;
 import unicam.ids.HackHub.model.InviteInsidePlatform;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,10 +15,10 @@ import java.util.List;
 @Repository
 public interface InsideInviteRepository extends JpaRepository<InviteInsidePlatform, Long> {
 
-    List<InviteInsidePlatform> findByRecipientUserAndStatus(User recipientUser, InviteStatus status);
+    List<InviteInsidePlatform> findByRecipientUserAndStatus(User recipientUser, InviteState status);
 
-    List<InviteInsidePlatform> findByTeamAndStatus(Team team, InviteStatus status);
-    boolean existsByRecipientUserAndTeamAndStatus(User recipientUser, Team team, InviteStatus status);
+    List<InviteInsidePlatform> findByTeamAndStatus(Team team, InviteState status);
+    boolean existsByRecipientUserAndTeamAndStatus(User recipientUser, Team team, InviteState status);
 
 
 
@@ -28,7 +28,7 @@ public interface InsideInviteRepository extends JpaRepository<InviteInsidePlatfo
         WHERE i.status = :status AND i.expiresAt < :dateTime
     """)
     List<InviteInsidePlatform> findExpiredInvites(
-            @Param("status") InviteStatus status,
+            @Param("status") InviteState status,
             @Param("dateTime") LocalDateTime dateTime
     );
 }

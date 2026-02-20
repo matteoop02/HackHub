@@ -5,7 +5,7 @@ import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
-import unicam.ids.HackHub.dto.requests.CreateTeamRequest;
+import unicam.ids.HackHub.dto.requests.team.CreateTeamRequest;
 import unicam.ids.HackHub.dto.responses.TeamMemberResponse;
 import unicam.ids.HackHub.exceptions.ResourceNotFoundException;
 import unicam.ids.HackHub.model.Team;
@@ -14,7 +14,6 @@ import unicam.ids.HackHub.model.UserRole;
 import unicam.ids.HackHub.repository.TeamRepository;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 

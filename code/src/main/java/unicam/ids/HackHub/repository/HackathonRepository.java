@@ -3,7 +3,7 @@ package unicam.ids.HackHub.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import unicam.ids.HackHub.enums.HackathonStatus;
+import unicam.ids.HackHub.enums.HackathonState;
 import unicam.ids.HackHub.model.Hackathon;
 import unicam.ids.HackHub.model.User;
 
@@ -27,9 +27,9 @@ public interface HackathonRepository extends JpaRepository<Hackathon, Long> {
 
     List<Hackathon> findHackathonByMentors(User user);
 
-    List<Hackathon> findByStateAndStartDateLessThanEqual(HackathonStatus hackathonStatus, LocalDateTime now);
+    List<Hackathon> findByStateAndStartDateLessThanEqual(HackathonState hackathonState, LocalDateTime now);
 
-    List<Hackathon> findByStateAndEndDateLessThanEqual(HackathonStatus hackathonStatus, LocalDateTime now);
+    List<Hackathon> findByStateAndEndDateLessThanEqual(HackathonState hackathonState, LocalDateTime now);
 
     Optional<Hackathon> findHackathonByIdAndIsPublic(int id, boolean b);
 }

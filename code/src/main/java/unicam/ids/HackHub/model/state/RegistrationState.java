@@ -1,7 +1,7 @@
 package unicam.ids.HackHub.model.state;
 
-import unicam.ids.HackHub.dto.requests.HackathonSubmissionEvaluationRequest;
-import unicam.ids.HackHub.enums.SubmissionStatus;
+import unicam.ids.HackHub.dto.requests.submission.HackathonSubmissionEvaluationRequest;
+import unicam.ids.HackHub.enums.SubmissionState;
 import unicam.ids.HackHub.exceptions.InvalidHackathonStateException;
 import unicam.ids.HackHub.exceptions.TeamAlreadyRegisteredException;
 import unicam.ids.HackHub.exceptions.TeamTooLargeException;
@@ -46,7 +46,7 @@ public class RegistrationState implements HackathonState {
                 .content(content)
                 .sendingDate(LocalDateTime.now())
                 .lastEdit(LocalDateTime.now())
-                .state(SubmissionStatus.INVIATA)
+                .state(SubmissionState.INVIATA)
                 .team(team)
                 .hackathon(team.getHackathon())
                 .build();

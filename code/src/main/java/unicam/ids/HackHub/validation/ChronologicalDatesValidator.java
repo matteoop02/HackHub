@@ -2,7 +2,7 @@ package unicam.ids.HackHub.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import unicam.ids.HackHub.dto.requests.CreateHackathonRequest;
+import unicam.ids.HackHub.dto.requests.hackathon.CreateHackathonRequest;
 
 import java.time.LocalDateTime;
 
@@ -13,10 +13,6 @@ public class ChronologicalDatesValidator implements ConstraintValidator<Chronolo
         LocalDateTime subscription = request.subscriptionDeadline();
         LocalDateTime start = request.startDate();
         LocalDateTime end = request.endDate();
-
-//        if (subscription == null || start == null || end == null) {
-//            return true;
-//        }
 
         boolean valid = subscription.isBefore(start) && start.isBefore(end);
 

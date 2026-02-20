@@ -4,10 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import unicam.ids.HackHub.dto.requests.CreateTeamSubmissionRequest;
-import unicam.ids.HackHub.dto.requests.HackathonSubmissionEvaluationRequest;
-import unicam.ids.HackHub.dto.requests.UpdateTeamSubmissionRequest;
-import unicam.ids.HackHub.enums.SubmissionStatus;
+import unicam.ids.HackHub.dto.requests.submission.CreateTeamSubmissionRequest;
+import unicam.ids.HackHub.dto.requests.submission.HackathonSubmissionEvaluationRequest;
+import unicam.ids.HackHub.dto.requests.submission.UpdateTeamSubmissionRequest;
+import unicam.ids.HackHub.enums.SubmissionState;
 import unicam.ids.HackHub.exceptions.ResourceNotFoundException;
 import unicam.ids.HackHub.factory.HackathonStateFactory;
 import unicam.ids.HackHub.model.Hackathon;
@@ -41,7 +41,7 @@ public class SubmissionService {
     }
 
     @Transactional(readOnly = true)
-    public Submission getSubmissionsByTeamNameAndHackathonNameAndStateIsNot(String name, String hackathonName, SubmissionStatus state) {
+    public Submission getSubmissionsByTeamNameAndHackathonNameAndStateIsNot(String name, String hackathonName, SubmissionState state) {
         return submissionRepository.findByTeamNameAndHackathonNameAndStateIsNot(name, hackathonName, state)
                 .orElseThrow(() -> new ResourceNotFoundException("Submission non trovata"));
     }
@@ -54,7 +54,7 @@ public class SubmissionService {
     public void evaluateHackathonSubmission(HackathonSubmissionEvaluationRequest request) {
         Hackathon hackathon = hackathonService.findHackathonByName(request.hackathonName());
         Team team = teamService.findByName(request.teamName());
-        Submission submission = getSubmissionsByTeamNameAndHackathonNameAndStateIsNot(team.getName(), hackathon.getName(), SubmissionStatus.VALUTATA);
+        Submission submission = getSubmissionsByTeamNameAndHackathonNameAndStateIsNot(team.getName(), hackathon.getName(), SubmissionState.VALUTATA);
         HackathonState hackathonState = HackathonStateFactory.from(hackathon.getState());
         hackathonState.evaluateHackathonSubmission(request, submission);
         submissionRepository.save(submission);
@@ -117,7 +117,7 @@ public void updateHackathonSubmissionEvaluation(HackathonSubmissionEvaluationReq
         throw new IllegalArgumentException("Scadenza sottomissione superata");
 
         //Cerco la Submission attuale ovvero quella che appartiene all'hackathon attuale
-        Submission submission = getSubmissionsByTeamNameAndHackathonNameAndStateIsNot(team.getName(), team.getHackathon().getName(), SubmissionStatus.VALUTATA);
+        Submission submission = getSubmissionsByTeamNameAndHackathonNameAndStateIsNot(team.getName(), team.getHackathon().getName(), SubmissionState.VALUTATA);
 
         submission.setTitle(request.title());   //Aggiorno il titolo
         submission.setContent(request.content());   //Aggiorno il contenuto
