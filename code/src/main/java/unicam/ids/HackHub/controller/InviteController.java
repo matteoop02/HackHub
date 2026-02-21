@@ -1,4 +1,5 @@
 package unicam.ids.HackHub.controller;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -24,65 +25,41 @@ public class InviteController {
     @Autowired
     private InviteService inviteService;
 
-    //------------------------------- OUTSIDE INVITE MANAGE -------------------------------
+    // ------------------------------- OUTSIDE INVITE MANAGE
+    // -------------------------------
 
     @PostMapping("/public/inviteOutsideUser")
-    @Operation(
-            summary = "Invia invito esterno",
-            description = "Permette a un utente di invitarne uno non registrato alla piattaforma.",
-            requestBody = @RequestBody(
-                    required = true,
-                    content = @Content(
-                            mediaType = "application/json",
-                            examples = @ExampleObject(
-                                    name = "Esempio di invio invito.",
-                                    value = """
-                                {
-                                  "recipientEmail": "matteo.fagnani@studenti.unicam.it",
-                                  "message": "qualcosa",
-                                }
-                                """
-                            )
-                    )
-            )
-    )
+    @Operation(summary = "Invia invito esterno", description = "Permette a un utente di invitarne uno non registrato alla piattaforma.", requestBody = @RequestBody(required = true, content = @Content(mediaType = "application/json", examples = @ExampleObject(name = "Esempio di invio invito.", value = """
+            {
+              "recipientEmail": "matteo.fagnani@studenti.unicam.it",
+              "message": "qualcosa",
+            }
+            """))))
     @ApiResponse(responseCode = "200", description = "Invito inviato con successo")
     @ApiResponse(responseCode = "400", description = "Errore nella richiesta o dati non validi")
-    public ResponseEntity<InviteOutsidePlatform> inviteOutsideUser(Authentication authentication, @Valid @RequestBody OutsideInviteRequest outsideInviteRequest) {
-        try{
+    public ResponseEntity<InviteOutsidePlatform> inviteOutsideUser(Authentication authentication,
+            @Valid @RequestBody OutsideInviteRequest outsideInviteRequest) {
+        try {
             InviteOutsidePlatform invite = inviteService.inviteOutsideUser(authentication, outsideInviteRequest);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(invite);
 
-        }catch (Exception ex){
-            return  ResponseEntity.badRequest().build();
+        } catch (Exception ex) {
+            return ResponseEntity.badRequest().build();
         }
     }
 
     @PostMapping("/outside/acceptInviteAndRegisterUser")
-    @Operation(
-        summary = "Accetta invito esterno e registra l'utente",
-        description = "Permette a un utente invitato via email di completare la registrazione usando il token dell’invito.",
-        requestBody = @RequestBody(
-                required = true,
-                content = @Content(
-                        mediaType = "application/json",
-                        examples = @ExampleObject(
-                                name = "Esempio registrazione da invito",
-                                value = """
-                                {
-                                  "token": "abc123TOKENabc123",
-                                  "username": "andrea.pistolesi",
-                                  "name": "Andrea",
-                                  "surname": "Pistolesi",
-                                  "password": "123456789",
-                                  "dateOfBirth": "2000-03-02"
-                                }
-                                """
-                        )
-                )
-        )
-    )
+    @Operation(summary = "Accetta invito esterno e registra l'utente", description = "Permette a un utente invitato via email di completare la registrazione usando il token dell’invito.", requestBody = @RequestBody(required = true, content = @Content(mediaType = "application/json", examples = @ExampleObject(name = "Esempio registrazione da invito", value = """
+            {
+              "token": "abc123TOKENabc123",
+              "username": "andrea.pistolesi",
+              "name": "Andrea",
+              "surname": "Pistolesi",
+              "password": "123456789",
+              "dateOfBirth": "2000-03-02"
+            }
+            """))))
     @ApiResponse(responseCode = "200", description = "Invito e registrazione avvenuti con successo")
     @ApiResponse(responseCode = "400", description = "Errore nella richiesta o dati non validi")
     public ResponseEntity<String> acceptInviteAndRegisterUser(@RequestBody @Valid RegisterFromInviteRequest request) {
@@ -95,69 +72,68 @@ public class InviteController {
     }
 
     @PostMapping("/outside/rejectOutsideInvite")
-    @Operation(
-            summary = "Rifiuta invito esterno.",
-            description = "Permette a un utente di rifiutare l’invito esterno.",
-            requestBody = @RequestBody(
-                    required = true,
-                    content = @Content(
-                            mediaType = "application/json",
-                            examples = @ExampleObject(
-                                    name = "Esempio di rifiuto.",
-                                    value = """
-                                {
-                                  "token": "abc123TOKENabc123",
-                                }
-                                """
-                            )
-                    )
-            )
-    )
+    @Operation(summary = "Rifiuta invito esterno.", description = "Permette a un utente di rifiutare l’invito esterno.", requestBody = @RequestBody(required = true, content = @Content(mediaType = "application/json", examples = @ExampleObject(name = "Esempio di rifiuto.", value = """
+            {
+              "token": "abc123TOKENabc123",
+            }
+            """))))
     @ApiResponse(responseCode = "200", description = "Rifiuto avvenuto con successo")
     @ApiResponse(responseCode = "400", description = "Errore nella richiesta o dati non validi")
-    public ResponseEntity<String> rejectOutsideInvite(@RequestBody @Valid RejectOutsideInviteRequest rejectOutsideInviteRequest) {
-        try{
+    public ResponseEntity<String> rejectOutsideInvite(
+            @RequestBody @Valid RejectOutsideInviteRequest rejectOutsideInviteRequest) {
+        try {
             inviteService.rejectOutsideInvite(rejectOutsideInviteRequest);
             return ResponseEntity.ok("Rifiuto dell'invito riuscito!");
-        } catch (Exception ex){
+        } catch (Exception ex) {
             return ResponseEntity.badRequest().body("Rifiuto dell'invito fallito!" + ex.getMessage());
         }
     }
 
-    //------------------------------- INSIDE INVITE MANAGE -------------------------------
+    // ------------------------------- INSIDE INVITE MANAGE
+    // -------------------------------
 
     @PostMapping("/leaderDelTeam/inviteToTeam")
-    public ResponseEntity<InviteInsidePlatform> inviteToTeam(@RequestBody @Valid InsideInviteRequest insideInviteRequest) {
+    @Operation(summary = "Invita un utente al team", description = "Permette al leader di un team di invitare un utente già registrato a unirsi al team.")
+    @ApiResponse(responseCode = "201", description = "Invito al team creato con successo")
+    @ApiResponse(responseCode = "400", description = "Errore nella richiesta o utente non valido")
+    public ResponseEntity<InviteInsidePlatform> inviteToTeam(
+            @RequestBody @Valid InsideInviteRequest insideInviteRequest) {
 
         InviteInsidePlatform invite = inviteService.inviteUserToTeam(insideInviteRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(invite);
     }
 
     @PostMapping("/inviteManage/acceptTeamInvite")
-    public ResponseEntity<String> acceptTeamInvite(Authentication authentication, @RequestBody @Valid AcceptTeamInvite acceptTeamInvite) {
+    @Operation(summary = "Accetta invito al team", description = "Permette a un utente autenticato di accettare un invito ricevuto per entrare in un team.")
+    @ApiResponse(responseCode = "200", description = "Invito accettato con successo")
+    @ApiResponse(responseCode = "400", description = "Errore durante l'accettazione dell'invito")
+    public ResponseEntity<String> acceptTeamInvite(Authentication authentication,
+            @RequestBody @Valid AcceptTeamInvite acceptTeamInvite) {
         try {
             inviteService.acceptTeamInvite(authentication, acceptTeamInvite);
             return ResponseEntity.ok("Invito accettato con successo!");
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             return ResponseEntity.badRequest().body("Accettazione dell'invito fallita!\n" + ex.getMessage());
         }
     }
 
     @PostMapping("/inviteManage/rejectTeamInvite")
+    @Operation(summary = "Rifiuta invito al team", description = "Permette a un utente autenticato di rifiutare un invito ricevuto per entrare in un team.")
+    @ApiResponse(responseCode = "200", description = "Invito rifiutato con successo")
+    @ApiResponse(responseCode = "400", description = "Errore durante il rifiuto dell'invito")
     public ResponseEntity<String> rejectTeamInvite(Authentication authentication, @RequestParam Long inviteId) {
         try {
             inviteService.rejectTeamInvite(authentication, inviteId);
             return ResponseEntity.ok("Invito accettato con successo!");
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             return ResponseEntity.badRequest().body("Accettazione dell'invito fallita!\n" + ex.getMessage());
         }
     }
 
-    //------------------------------- GET INVITE -------------------------------
+    // ------------------------------- GET INVITE -------------------------------
 
     @GetMapping("/inviteManage/senderEmail")
+    @Operation(summary = "Recupera inviti pendenti dell'utente", description = "Restituisce la lista degli inviti pendenti ricevuti dall'utente autenticato.")
     public ResponseEntity<List<InviteInsidePlatform>> findPendingInvitesForEmails(Authentication authentication) {
 
         List<InviteInsidePlatform> invites = inviteService.findPendingInvitesForUser(authentication);
@@ -165,6 +141,7 @@ public class InviteController {
     }
 
     @GetMapping("/inviteManage/user")
+    @Operation(summary = "Recupera tutti gli inviti pendenti per l'utente", description = "Restituisce tutti gli inviti pendenti associati all'utente autenticato.")
     public ResponseEntity<List<InviteInsidePlatform>> findAllPendingInvitesForUsers(Authentication authentication) {
 
         List<InviteInsidePlatform> invites = inviteService.findPendingInvitesForUser(authentication);
@@ -172,12 +149,14 @@ public class InviteController {
     }
 
     @GetMapping("/inviteManage/team")
+    @Operation(summary = "Recupera inviti dei team", description = "Restituisce tutti gli inviti relativi ai team dell'utente autenticato.")
     public ResponseEntity<List<InviteInsidePlatform>> findAllTeamInvites(Authentication authentication) {
         List<InviteInsidePlatform> invites = inviteService.findTeamInvites(authentication);
         return ResponseEntity.ok(invites);
     }
 
     @GetMapping("/inviteManage/recipientEmail")
+    @Operation(summary = "Recupera inviti per email destinatario", description = "Restituisce tutti gli inviti (interni ed esterni) associati a una determinata email.")
     public ResponseEntity<List<Invite>> findAllRecipientEmailInvites(@RequestParam String recipientEmail) {
         List<Invite> invites = inviteService.findEmailInvites(recipientEmail);
         return ResponseEntity.ok(invites);
