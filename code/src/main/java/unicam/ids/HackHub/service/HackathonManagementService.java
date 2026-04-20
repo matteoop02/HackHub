@@ -1,7 +1,10 @@
 package unicam.ids.HackHub.service;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import unicam.ids.HackHub.dto.requests.AssignJudgeRequest;
+import unicam.ids.HackHub.dto.requests.AssignMentorsRequest;
 import unicam.ids.HackHub.dto.requests.DeclareWinningTeamRequest;
 import unicam.ids.HackHub.dto.requests.hackathon.CreateHackathonRequest;
 import unicam.ids.HackHub.enums.HackathonRole;
@@ -18,6 +21,7 @@ import unicam.ids.HackHub.repository.TeamRepository;
 import unicam.ids.HackHub.repository.UserRepository;
 import unicam.ids.HackHub.util.RoleNames;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -102,6 +106,10 @@ public class HackathonManagementService {
             DeclareWinningTeamRequest request) {
         Hackathon hackathon = getManagedHackathon(authentication, hackathonId);
 
+        if (hackathon.getState() != HackathonState.IN_VALUTAZIONE) {
+            throw new BusinessLogicException("Il team vincitore puo' essere proclamato solo quando l'hackathon e' in valutazione");
+        }
+
         Team winner = teamRepository.findById(request.teamId())
                 .orElseThrow(() -> new ResourceNotFoundException("Team non trovato"));
 
@@ -126,6 +134,46 @@ public class HackathonManagementService {
         paymentService.payWinningTeam(hackathon);
     }
 
+    public void assignJudge(Authentication authentication, Long hackathonId, AssignJudgeRequest request) {
+        Hackathon hackathon = getManagedHackathon(authentication, hackathonId);
+        User judge = getActiveUser(request.judgeId(), "Giudice non trovato");
+
+        if (!RoleNames.JUDGE.equals(judge.getRole().getName())) {
+            throw new BusinessLogicException("L'utente selezionato non ha ruolo base GIUDICE");
+        }
+
+        hackathonRoleAssignmentService.assignRole(judge, hackathon, HackathonRole.JUDGE);
+    }
+
+    public void removeJudge(Authentication authentication, Long hackathonId, Long judgeId) {
+        Hackathon hackathon = getManagedHackathon(authentication, hackathonId);
+        User judge = getActiveUser(judgeId, "Giudice non trovato");
+        hackathonRoleAssignmentService.removeRole(judge, hackathon, HackathonRole.JUDGE);
+    }
+
+    public void assignMentors(Authentication authentication, Long hackathonId, AssignMentorsRequest request) {
+        Hackathon hackathon = getManagedHackathon(authentication, hackathonId);
+
+        for (Long mentorId : request.mentorIds()) {
+            User mentor = getActiveUser(mentorId, "Mentore non trovato");
+            if (!RoleNames.MENTOR.equals(mentor.getRole().getName())) {
+                throw new BusinessLogicException("L'utente con id " + mentorId + " non ha ruolo base MENTOR");
+            }
+            hackathonRoleAssignmentService.assignRole(mentor, hackathon, HackathonRole.MENTOR);
+        }
+    }
+
+    public void removeMentor(Authentication authentication, Long hackathonId, Long mentorId) {
+        Hackathon hackathon = getManagedHackathon(authentication, hackathonId);
+        User mentor = getActiveUser(mentorId, "Mentore non trovato");
+        hackathonRoleAssignmentService.removeRole(mentor, hackathon, HackathonRole.MENTOR);
+    }
+
+    @Scheduled(cron = "0 * * * * *")
+    public void terminateExpiredHackathons() {
+        moveExpiredHackathonsToEvaluation();
+    }
+
     private Hackathon getManagedHackathon(Authentication authentication, Long id) {
         Hackathon hackathon = hackathonRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Hackathon non trovato"));
@@ -138,6 +186,27 @@ public class HackathonManagementService {
         }
 
         return hackathon;
+    }
+
+    private User getActiveUser(Long userId, String errorMessage) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(errorMessage));
+        if (Boolean.TRUE.equals(user.getIsDeleted())) {
+            throw new ResourceNotFoundException(errorMessage);
+        }
+        return user;
+    }
+
+    private void moveExpiredHackathonsToEvaluation() {
+        List<Hackathon> hackathonsToEvaluate = hackathonRepository.findAll().stream()
+                .filter(hackathon -> hackathon.getState() != HackathonState.CONCLUSO)
+                .filter(hackathon -> hackathon.getState() != HackathonState.IN_VALUTAZIONE)
+                .filter(hackathon -> hackathon.getEndDate() != null)
+                .filter(hackathon -> !hackathon.getEndDate().isAfter(LocalDateTime.now()))
+                .toList();
+
+        hackathonsToEvaluate.forEach(hackathon -> hackathon.setState(HackathonState.IN_VALUTAZIONE));
+        hackathonRepository.saveAll(hackathonsToEvaluate);
     }
 
     private HackathonResponse mapToResponse(Hackathon hackathon) {

@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import unicam.ids.HackHub.dto.requests.AssignJudgeRequest;
+import unicam.ids.HackHub.dto.requests.AssignMentorsRequest;
 import unicam.ids.HackHub.dto.requests.DeclareWinningTeamRequest;
 import unicam.ids.HackHub.dto.requests.hackathon.CreateHackathonRequest;
 import unicam.ids.HackHub.dto.responses.HackathonResponse;
@@ -112,4 +114,65 @@ public class HackathonController {
         hackathonService.payPrize(authentication, id);
         return ResponseEntity.ok("Premio erogato con successo");
     }
+
+    @PostMapping("/{id}/judge")
+    @Operation(summary = "Aggiungi giudice all'hackathon", description = "Permette all'organizzatore di assegnare un giudice all'hackathon.")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            required = true,
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject(
+                            name = "Assegna Giudice",
+                            value = """
+                                    {
+                                      "judgeId": 7
+                                    }
+                                    """
+                    )
+            )
+    )
+    public ResponseEntity<String> assignJudge(Authentication authentication, @PathVariable Long id,
+            @RequestBody @Valid AssignJudgeRequest request) {
+        hackathonService.assignJudge(authentication, id, request);
+        return ResponseEntity.ok("Giudice assegnato con successo");
+    }
+
+    @DeleteMapping("/{id}/judge/{judgeId}")
+    @Operation(summary = "Rimuovi giudice dall'hackathon", description = "Permette all'organizzatore di rimuovere il giudice assegnato all'hackathon.")
+    public ResponseEntity<String> removeJudge(Authentication authentication, @PathVariable Long id,
+            @PathVariable Long judgeId) {
+        hackathonService.removeJudge(authentication, id, judgeId);
+        return ResponseEntity.ok("Giudice rimosso con successo");
+    }
+
+    @PostMapping("/{id}/mentors")
+    @Operation(summary = "Aggiungi mentori all'hackathon", description = "Permette all'organizzatore di assegnare uno o piu' mentori all'hackathon.")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            required = true,
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject(
+                            name = "Assegna Mentori",
+                            value = """
+                                    {
+                                      "mentorIds": [8, 9]
+                                    }
+                                    """
+                    )
+            )
+    )
+    public ResponseEntity<String> assignMentors(Authentication authentication, @PathVariable Long id,
+            @RequestBody @Valid AssignMentorsRequest request) {
+        hackathonService.assignMentors(authentication, id, request);
+        return ResponseEntity.ok("Mentori assegnati con successo");
+    }
+
+    @DeleteMapping("/{id}/mentors/{mentorId}")
+    @Operation(summary = "Rimuovi mentore dall'hackathon", description = "Permette all'organizzatore di rimuovere un mentore dall'hackathon.")
+    public ResponseEntity<String> removeMentor(Authentication authentication, @PathVariable Long id,
+            @PathVariable Long mentorId) {
+        hackathonService.removeMentor(authentication, id, mentorId);
+        return ResponseEntity.ok("Mentore rimosso con successo");
+    }
+
 }

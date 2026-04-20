@@ -12,6 +12,7 @@ import unicam.ids.HackHub.repository.HackathonRepository;
 import unicam.ids.HackHub.repository.HackathonRoleAssignmentRepository;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -64,8 +65,18 @@ public class HackathonRoleAssignmentService {
         return hackathon.getMentors();
     }
 
+    public List<User> getUsersByRole(Hackathon hackathon, HackathonRole role) {
+        return hackathonRoleAssignmentRepository.findByHackathonAndRole(hackathon, role).stream()
+                .map(HackathonRoleAssignment::getUser)
+                .toList();
+    }
+
     @Transactional
     public void assignRole(User user, Hackathon hackathon, HackathonRole role) {
+        if (role == HackathonRole.JUDGE) {
+            hackathonRoleAssignmentRepository.deleteByHackathonAndRole(hackathon, HackathonRole.JUDGE);
+        }
+
         if (hackathonRoleAssignmentRepository.existsByUserAndHackathonAndRole(user, hackathon, role)) {
             throw new BusinessLogicException("Ruolo hackathon gia' assegnato a questo utente");
         }
@@ -76,6 +87,29 @@ public class HackathonRoleAssignmentService {
                 .role(role)
                 .build());
 
+        syncLegacyState(hackathon);
+    }
+
+    @Transactional
+    public void removeRole(User user, Hackathon hackathon, HackathonRole role) {
+        if (!hackathonRoleAssignmentRepository.existsByUserAndHackathonAndRole(user, hackathon, role)
+                && !hasLegacyRole(user, hackathon, role)) {
+            throw new ResourceNotFoundException("Assegnazione ruolo hackathon non trovata");
+        }
+
+        hackathonRoleAssignmentRepository.deleteByUserAndHackathonAndRole(user, hackathon, role);
+        Hackathon managedHackathon = hackathonRepository.findById(hackathon.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Hackathon non trovato"));
+        switch (role) {
+            case JUDGE -> {
+                if (managedHackathon.getJudge() != null && Objects.equals(managedHackathon.getJudge().getId(), user.getId())) {
+                    managedHackathon.setJudge(null);
+                }
+            }
+            case MENTOR -> managedHackathon.getMentors().removeIf(mentor -> Objects.equals(mentor.getId(), user.getId()));
+            case ORGANIZER -> throw new BusinessLogicException("L'organizzatore non puo' essere rimosso con questa operazione");
+        }
+        hackathonRepository.save(managedHackathon);
         syncLegacyState(hackathon);
     }
 
@@ -103,18 +137,16 @@ public class HackathonRoleAssignmentService {
 
         managedHackathon.setOrganizer(organizer);
         managedHackathon.setJudge(judge);
-        if (!mentors.isEmpty()) {
-            managedHackathon.setMentors(mentors);
-        }
+        managedHackathon.setMentors(mentors);
 
         hackathonRepository.save(managedHackathon);
     }
 
     private boolean hasLegacyRole(User user, Hackathon hackathon, HackathonRole role) {
         return switch (role) {
-            case ORGANIZER -> hackathon.getOrganizer() != null && hackathon.getOrganizer().getId().equals(user.getId());
-            case JUDGE -> hackathon.getJudge() != null && hackathon.getJudge().getId().equals(user.getId());
-            case MENTOR -> hackathon.getMentors().stream().anyMatch(mentor -> mentor.getId().equals(user.getId()));
+            case ORGANIZER -> hackathon.getOrganizer() != null && Objects.equals(hackathon.getOrganizer().getId(), user.getId());
+            case JUDGE -> hackathon.getJudge() != null && Objects.equals(hackathon.getJudge().getId(), user.getId());
+            case MENTOR -> hackathon.getMentors().stream().anyMatch(mentor -> Objects.equals(mentor.getId(), user.getId()));
         };
     }
 }

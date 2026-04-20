@@ -15,4 +15,6 @@ public interface HackathonRoleAssignmentRepository extends JpaRepository<Hackath
     List<HackathonRoleAssignment> findByHackathonAndRole(Hackathon hackathon, HackathonRole role);
     List<HackathonRoleAssignment> findByUser(User user);
     boolean existsByUserAndHackathonAndRole(User user, Hackathon hackathon, HackathonRole role);
+    void deleteByUserAndHackathonAndRole(User user, Hackathon hackathon, HackathonRole role);
+    void deleteByHackathonAndRole(Hackathon hackathon, HackathonRole role);
 }
