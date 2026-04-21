@@ -42,6 +42,15 @@ public class HackathonController {
         return ResponseEntity.ok(hackathonService.getHackathons(isAuthenticated));
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "Dettaglio hackathon", description = "Restituisce le informazioni di un hackathon. Senza autenticazione sono visibili solo gli hackathon pubblici.")
+    @ApiResponse(responseCode = "200", description = "Hackathon ottenuto con successo")
+    @ApiResponse(responseCode = "404", description = "Hackathon non trovato")
+    public ResponseEntity<HackathonResponse> getHackathonById(Authentication authentication, @PathVariable Long id) {
+        boolean isAuthenticated = authentication != null && authentication.isAuthenticated();
+        return ResponseEntity.ok(hackathonService.getHackathonById(id, isAuthenticated));
+    }
+
     @PostMapping("/organizzatore/create")
     @Operation(summary = "Creazione nuovo hackathon", description = "Permette la registrazione di un nuovo hackathon", requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Dati dell'hackathon da registrare", required = true, content = @Content(mediaType = "application/json", examples = @ExampleObject(name = "Esempio registrazione", value = """
                 {

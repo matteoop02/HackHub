@@ -59,6 +59,17 @@ public class HackathonManagementService {
                 .collect(Collectors.toList());
     }
 
+    public HackathonResponse getHackathonById(Long hackathonId, boolean isAuthenticated) {
+        Hackathon hackathon = hackathonRepository.findById(hackathonId)
+                .orElseThrow(() -> new ResourceNotFoundException("Hackathon non trovato"));
+
+        if (!isAuthenticated && !Boolean.TRUE.equals(hackathon.getIsPublic())) {
+            throw new UnauthorizedAccessException("Questo hackathon non e' visibile senza autenticazione");
+        }
+
+        return mapToResponse(hackathon);
+    }
+
     public HackathonResponse createHackathon(Authentication authentication, CreateHackathonRequest request) {
         if (hackathonRepository.findByName(request.name()).isPresent()) {
             throw new BusinessLogicException("Hackathon con il nome scelto gia' esistente");

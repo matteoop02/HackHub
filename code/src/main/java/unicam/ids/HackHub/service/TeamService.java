@@ -4,6 +4,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import unicam.ids.HackHub.dto.requests.team.CreateTeamRequest;
 import unicam.ids.HackHub.dto.responses.TeamResponse;
+import unicam.ids.HackHub.dto.responses.UserResponse;
 import unicam.ids.HackHub.enums.HackathonRole;
 import unicam.ids.HackHub.enums.TeamRole;
 import unicam.ids.HackHub.exceptions.BusinessLogicException;
@@ -20,6 +21,7 @@ import unicam.ids.HackHub.repository.UserRepository;
 import unicam.ids.HackHub.util.RoleNames;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -99,6 +101,43 @@ public class TeamService {
         teamMembershipService.removeMembership(user, team);
     }
 
+    public List<UserResponse> getCurrentTeamMembers(Authentication authentication) {
+        User user = userRepository.findByUsernameAndIsDeletedFalse(authentication.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("Utente non trovato o eliminato"));
+
+        Team team = teamMembershipService.getCurrentTeam(user);
+        if (team == null) {
+            throw new BusinessLogicException("L'utente non fa parte di alcun team");
+        }
+
+        return teamMembershipService.getMembers(team).stream()
+                .map(this::mapToUserResponse)
+                .toList();
+    }
+
+    public void removeMember(Authentication authentication, Long memberId) {
+        User leader = userRepository.findByUsernameAndIsDeletedFalse(authentication.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("Utente non trovato o eliminato"));
+
+        Team team = teamMembershipService.getCurrentTeam(leader);
+        if (team == null || !teamMembershipService.isLeader(leader, team)) {
+            throw new UnauthorizedAccessException("Solo il leader del team puo' eliminare un membro");
+        }
+
+        User member = userRepository.findById(memberId)
+                .orElseThrow(() -> new ResourceNotFoundException("Membro non trovato"));
+
+        Team memberTeam = teamMembershipService.getCurrentTeam(member);
+        if (memberTeam == null || !memberTeam.getId().equals(team.getId())) {
+            throw new BusinessLogicException("L'utente indicato non appartiene al team del leader");
+        }
+        if (teamMembershipService.isLeader(member, team)) {
+            throw new BusinessLogicException("Il leader non puo' essere eliminato con questa operazione");
+        }
+
+        teamMembershipService.removeMembership(member, team);
+    }
+
     private TeamResponse mapToResponse(Team team) {
         User leader = teamMembershipService.getLeader(team);
         return TeamResponse.builder()
@@ -109,6 +148,17 @@ public class TeamService {
                 .leaderId(leader != null ? leader.getId() : null)
                 .memberIds(teamMembershipService.getMemberIds(team))
                 .mentorIds(team.getMentors().stream().map(User::getId).toList())
+                .build();
+    }
+
+    private UserResponse mapToUserResponse(User user) {
+        return UserResponse.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .surname(user.getSurname())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .roleName(user.getRole().getName())
                 .build();
     }
 

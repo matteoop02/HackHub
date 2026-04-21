@@ -3,6 +3,8 @@ package unicam.ids.HackHub.service;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import unicam.ids.HackHub.dto.requests.AcceptInsideInviteRequest;
+import unicam.ids.HackHub.dto.requests.AcceptOutsideInviteRequest;
+import unicam.ids.HackHub.dto.responses.OutsideInviteAcceptanceResponse;
 import unicam.ids.HackHub.dto.requests.invite.InsideInviteRequest;
 import unicam.ids.HackHub.dto.requests.invite.RejectInsideInviteRequest;
 import unicam.ids.HackHub.dto.requests.invite.RejectOutsideInviteRequest;
@@ -53,6 +55,31 @@ public class InviteService {
                 .orElseThrow(() -> new ResourceNotFoundException("Invito non trovato"));
         invite.reject();
         outsideInviteRepository.save(invite);
+    }
+
+    public OutsideInviteAcceptanceResponse acceptOutsideInvite(AcceptOutsideInviteRequest request) {
+        InviteOutsidePlatform invite = outsideInviteRepository.findByInviteToken(request.token())
+                .orElseThrow(() -> new ResourceNotFoundException("Invito non trovato"));
+
+        if (invite.isExpired()) {
+            invite.setStatus(InviteState.SCADUTO);
+            outsideInviteRepository.save(invite);
+            throw new BusinessLogicException("L'invito esterno e' scaduto");
+        }
+
+        if (userRepository.existsByEmail(invite.getRecipientEmail())) {
+            throw new BusinessLogicException("Esiste gia' un account registrato con questa email");
+        }
+
+        invite.accept();
+        outsideInviteRepository.save(invite);
+
+        return OutsideInviteAcceptanceResponse.builder()
+                .recipientEmail(invite.getRecipientEmail())
+                .message(invite.getMessage())
+                .status(invite.getStatus().name())
+                .nextStep("Procedi con la registrazione sulla piattaforma utilizzando questa email")
+                .build();
     }
 
     public InviteResponse inviteUserToTeam(Authentication authentication, InsideInviteRequest request) {

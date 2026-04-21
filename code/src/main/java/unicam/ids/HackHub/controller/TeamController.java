@@ -12,7 +12,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import unicam.ids.HackHub.dto.requests.team.CreateTeamRequest;
 import unicam.ids.HackHub.dto.responses.TeamResponse;
+import unicam.ids.HackHub.dto.responses.UserResponse;
 import unicam.ids.HackHub.service.TeamService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/team")
@@ -54,6 +57,23 @@ public class TeamController {
     public ResponseEntity<String> leaveTeam(Authentication authentication) {
         teamService.leaveTeam(authentication);
         return ResponseEntity.ok("Hai lasciato il team con successo");
+    }
+
+    @GetMapping("/members/me")
+    @Operation(summary = "Visualizza membri del proprio team", description = "Permette a un membro del team di visualizzare tutti i membri del team di appartenenza.")
+    @ApiResponse(responseCode = "200", description = "Membri del team ottenuti con successo")
+    @ApiResponse(responseCode = "400", description = "Errore nella richiesta")
+    public ResponseEntity<List<UserResponse>> getMyTeamMembers(Authentication authentication) {
+        return ResponseEntity.ok(teamService.getCurrentTeamMembers(authentication));
+    }
+
+    @DeleteMapping("/members/{memberId}")
+    @Operation(summary = "Elimina membro del team", description = "Permette al leader del team di eliminare un membro del proprio team.")
+    @ApiResponse(responseCode = "200", description = "Membro rimosso con successo")
+    @ApiResponse(responseCode = "400", description = "Errore nella richiesta")
+    public ResponseEntity<String> removeMember(Authentication authentication, @PathVariable Long memberId) {
+        teamService.removeMember(authentication, memberId);
+        return ResponseEntity.ok("Membro rimosso con successo");
     }
 
     @PostMapping("/{teamId}/subscribe/{hackathonId}")

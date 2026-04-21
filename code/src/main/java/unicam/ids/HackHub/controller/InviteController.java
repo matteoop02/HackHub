@@ -7,9 +7,11 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import unicam.ids.HackHub.dto.requests.AcceptOutsideInviteRequest;
 import unicam.ids.HackHub.dto.requests.AcceptInsideInviteRequest;
 import unicam.ids.HackHub.dto.requests.invite.*;
 import unicam.ids.HackHub.dto.responses.InviteResponse;
+import unicam.ids.HackHub.dto.responses.OutsideInviteAcceptanceResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -37,6 +39,19 @@ public class InviteController {
             @RequestBody @Valid RejectOutsideInviteRequest rejectOutsideInviteRequest) {
         inviteService.rejectOutsideInvite(rejectOutsideInviteRequest);
         return ResponseEntity.ok("Rifiuto dell'invito riuscito!");
+    }
+
+    @PostMapping("/outside/accept")
+    @Operation(summary = "Accetta invito esterno.", description = "Permette a un non utente della piattaforma di accettare l'invito esterno e procedere poi alla registrazione.", requestBody = @RequestBody(required = true, content = @Content(mediaType = "application/json", examples = @ExampleObject(name = "Esempio di accettazione.", value = """
+            {
+              "token": "abc123TOKENabc123"
+            }
+            """))))
+    @ApiResponse(responseCode = "200", description = "Accettazione avvenuta con successo")
+    @ApiResponse(responseCode = "400", description = "Errore nella richiesta o invito non valido")
+    public ResponseEntity<OutsideInviteAcceptanceResponse> acceptOutsideInvite(
+            @RequestBody @Valid AcceptOutsideInviteRequest request) {
+        return ResponseEntity.ok(inviteService.acceptOutsideInvite(request));
     }
 
     @PostMapping("/leaderDelTeam/inviteToTeam")
