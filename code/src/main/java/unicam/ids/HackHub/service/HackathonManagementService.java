@@ -7,6 +7,7 @@ import unicam.ids.HackHub.dto.requests.AssignJudgeRequest;
 import unicam.ids.HackHub.dto.requests.AssignMentorsRequest;
 import unicam.ids.HackHub.dto.requests.DeclareWinningTeamRequest;
 import unicam.ids.HackHub.dto.requests.hackathon.CreateHackathonRequest;
+import unicam.ids.HackHub.dto.responses.PrizePaymentStatusResponse;
 import unicam.ids.HackHub.enums.HackathonRole;
 import unicam.ids.HackHub.dto.responses.HackathonResponse;
 import unicam.ids.HackHub.enums.HackathonState;
@@ -143,6 +144,11 @@ public class HackathonManagementService {
     public void payPrize(Authentication authentication, Long hackathonId) {
         Hackathon hackathon = getManagedHackathon(authentication, hackathonId);
         paymentService.payWinningTeam(hackathon);
+    }
+
+    public PrizePaymentStatusResponse getPaymentStatus(Authentication authentication, Long hackathonId) {
+        Hackathon hackathon = getManagedHackathon(authentication, hackathonId);
+        return paymentService.getPaymentStatus(hackathon);
     }
 
     public void assignJudge(Authentication authentication, Long hackathonId, AssignJudgeRequest request) {

@@ -15,6 +15,7 @@ import unicam.ids.HackHub.dto.requests.AssignMentorsRequest;
 import unicam.ids.HackHub.dto.requests.DeclareWinningTeamRequest;
 import unicam.ids.HackHub.dto.requests.hackathon.CreateHackathonRequest;
 import unicam.ids.HackHub.dto.responses.HackathonResponse;
+import unicam.ids.HackHub.dto.responses.PrizePaymentStatusResponse;
 import unicam.ids.HackHub.service.HackathonManagementService;
 
 import java.util.List;
@@ -122,6 +123,13 @@ public class HackathonController {
     public ResponseEntity<String> payPrize(Authentication authentication, @PathVariable Long id) {
         hackathonService.payPrize(authentication, id);
         return ResponseEntity.ok("Premio erogato con successo");
+    }
+
+    @GetMapping("/{id}/payment-status")
+    @Operation(summary = "Verifica stato pagamento premio", description = "Permette all'organizzatore di verificare lo stato di pagamento del premio tramite il sistema di pagamento.")
+    @ApiResponse(responseCode = "200", description = "Stato pagamento recuperato con successo")
+    public ResponseEntity<PrizePaymentStatusResponse> getPaymentStatus(Authentication authentication, @PathVariable Long id) {
+        return ResponseEntity.ok(hackathonService.getPaymentStatus(authentication, id));
     }
 
     @PostMapping("/{id}/judge")

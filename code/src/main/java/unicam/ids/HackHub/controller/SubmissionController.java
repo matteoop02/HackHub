@@ -120,4 +120,30 @@ public class SubmissionController {
         submissionService.evaluateSubmission(authentication, request);
         return ResponseEntity.ok("Sottomissione valutata con successo");
     }
+
+    @PutMapping("/staff/evaluate")
+    @Operation(summary = "Modifica valutazione sottomissione (Giudice)", description = "Permette al giudice di modificare la valutazione di una sottomissione entro il periodo di valutazione dell'hackathon.")
+    @RequestBody(
+            required = true,
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject(
+                            name = "Modifica Valutazione Submission",
+                            value = """
+                                    {
+                                      "submissionId": 1,
+                                      "score": 9.0,
+                                      "comment": "Valutazione aggiornata dopo revisione finale del progetto."
+                                    }
+                                    """
+                    )
+            )
+    )
+    @ApiResponse(responseCode = "200", description = "Valutazione modificata con successo")
+    @ApiResponse(responseCode = "400", description = "Errore nella modifica della valutazione")
+    public ResponseEntity<String> updateEvaluationSubmission(Authentication authentication,
+            @Valid @RequestBody EvaluateSubmissionRequest request) {
+        submissionService.evaluateSubmission(authentication, request);
+        return ResponseEntity.ok("Valutazione modificata con successo");
+    }
 }

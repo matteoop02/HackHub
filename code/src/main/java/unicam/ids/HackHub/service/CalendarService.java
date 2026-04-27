@@ -25,6 +25,7 @@ import unicam.ids.HackHub.repository.UserRepository;
 import unicam.ids.HackHub.util.RoleNames;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -192,6 +193,48 @@ public class CalendarService {
         );
 
         return mapProposal(savedProposal);
+    }
+
+    public List<SupportCallProposalResponse> getMentorSupportRequests(Authentication authentication) {
+        User mentor = getAuthenticatedUser(authentication);
+        ensureMentor(mentor);
+
+        return supportCallProposalRepository.findByMentorIdOrderByProposedStartTimeAsc(mentor.getId()).stream()
+                .map(this::mapProposal)
+                .toList();
+    }
+
+    public void cancelSupportCallBooking(Authentication authentication, Long supportCallId) {
+        User mentor = getAuthenticatedUser(authentication);
+        ensureMentor(mentor);
+
+        SupportCallProposal proposal = supportCallProposalRepository.findById(supportCallId)
+                .orElseThrow(() -> new ResourceNotFoundException("Richiesta di supporto non trovata"));
+
+        if (!Objects.equals(proposal.getMentor().getId(), mentor.getId())) {
+            throw new UnauthorizedAccessException("La richiesta di supporto non appartiene al mentore autenticato");
+        }
+        if ("ANNULLATA_DAL_MENTORE".equals(proposal.getStatus())) {
+            throw new BusinessLogicException("La prenotazione e' gia' stata annullata");
+        }
+
+        proposal.setStatus("ANNULLATA_DAL_MENTORE");
+        if (proposal.getSlot() != null) {
+            proposal.getSlot().setBooked(false);
+            mentorAvailabilitySlotRepository.save(proposal.getSlot());
+        }
+        supportCallProposalRepository.save(proposal);
+
+        User leader = teamMembershipService.getLeader(proposal.getTeam());
+        if (leader != null) {
+            emailService.sendEmail(
+                    leader.getEmail(),
+                    "Prenotazione call annullata dal mentore",
+                    "Il mentore " + mentor.getName() + " " + mentor.getSurname()
+                            + " ha annullato la prenotazione della call prevista per "
+                            + proposal.getProposedStartTime() + "."
+            );
+        }
     }
 
     private User getAuthenticatedUser(Authentication authentication) {

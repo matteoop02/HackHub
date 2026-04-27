@@ -18,6 +18,8 @@ import unicam.ids.HackHub.dto.responses.MentorAvailabilitySlotResponse;
 import unicam.ids.HackHub.dto.responses.SupportCallProposalResponse;
 import unicam.ids.HackHub.service.CalendarService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/calendar")
 @RequiredArgsConstructor
@@ -120,5 +122,20 @@ public class CalendarController {
             @PathVariable Long slotId,
             @RequestBody @Valid BookSupportCallSlotRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(calendarService.bookSupportCallSlot(authentication, slotId, request));
+    }
+
+    @GetMapping("/support-calls/me")
+    @Operation(summary = "Visualizza richieste di supporto del mentore", description = "Permette al mentore di visualizzare le richieste e le prenotazioni di supporto a lui associate.")
+    @ApiResponse(responseCode = "200", description = "Richieste di supporto ottenute con successo")
+    public ResponseEntity<List<SupportCallProposalResponse>> getMentorSupportRequests(Authentication authentication) {
+        return ResponseEntity.ok(calendarService.getMentorSupportRequests(authentication));
+    }
+
+    @DeleteMapping("/support-calls/{supportCallId}")
+    @Operation(summary = "Cancella prenotazione call da parte del mentore", description = "Permette al mentore di annullare una prenotazione o richiesta di call di supporto e liberare lo slot associato.")
+    @ApiResponse(responseCode = "200", description = "Prenotazione annullata con successo")
+    public ResponseEntity<String> cancelSupportCallBooking(Authentication authentication, @PathVariable Long supportCallId) {
+        calendarService.cancelSupportCallBooking(authentication, supportCallId);
+        return ResponseEntity.ok("Prenotazione annullata con successo");
     }
 }

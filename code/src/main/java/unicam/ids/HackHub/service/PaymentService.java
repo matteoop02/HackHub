@@ -1,6 +1,7 @@
 package unicam.ids.HackHub.service;
 
 import org.springframework.stereotype.Service;
+import unicam.ids.HackHub.dto.responses.PrizePaymentStatusResponse;
 import unicam.ids.HackHub.exceptions.BusinessLogicException;
 import unicam.ids.HackHub.model.Hackathon;
 import unicam.ids.HackHub.model.PrizePayment;
@@ -33,6 +34,21 @@ public class PaymentService {
                 .orElseGet(() -> createPayment(hackathon));
     }
 
+    public PrizePaymentStatusResponse getPaymentStatus(Hackathon hackathon) {
+        return prizePaymentRepository.findByHackathonId(hackathon.getId())
+                .map(this::mapToStatusResponse)
+                .orElseGet(() -> PrizePaymentStatusResponse.builder()
+                        .hackathonId(hackathon.getId())
+                        .hackathonName(hackathon.getName())
+                        .teamId(hackathon.getTeamWinner() != null ? hackathon.getTeamWinner().getId() : null)
+                        .teamName(hackathon.getTeamWinner() != null ? hackathon.getTeamWinner().getName() : null)
+                        .amount(hackathon.getReward())
+                        .status("NON_EROGATO")
+                        .paidAt(null)
+                        .transactionReference(null)
+                        .build());
+    }
+
     private PrizePayment createPayment(Hackathon hackathon) {
         Team winningTeam = hackathon.getTeamWinner();
         PrizePayment payment = PrizePayment.builder()
@@ -55,5 +71,18 @@ public class PaymentService {
         ));
 
         return savedPayment;
+    }
+
+    private PrizePaymentStatusResponse mapToStatusResponse(PrizePayment payment) {
+        return PrizePaymentStatusResponse.builder()
+                .hackathonId(payment.getHackathon().getId())
+                .hackathonName(payment.getHackathon().getName())
+                .teamId(payment.getTeam().getId())
+                .teamName(payment.getTeam().getName())
+                .amount(payment.getAmount())
+                .status(payment.getStatus())
+                .paidAt(payment.getPaidAt())
+                .transactionReference(payment.getTransactionReference())
+                .build();
     }
 }
