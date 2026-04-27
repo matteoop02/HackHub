@@ -120,6 +120,9 @@ public class SubmissionService {
                 || !hackathonRoleAssignmentService.hasRole(evaluator, submission.getHackathon(), HackathonRole.JUDGE)) {
             throw new UnauthorizedAccessException("Non sei il giudice di questo hackathon");
         }
+        if (submission.getHackathon().getState() != unicam.ids.HackHub.enums.HackathonState.IN_VALUTAZIONE) {
+            throw new BusinessLogicException("La valutazione puo' essere inserita o modificata solo durante la fase di valutazione");
+        }
 
         submission.setScore(request.score());
         submission.setComment(request.comment());
