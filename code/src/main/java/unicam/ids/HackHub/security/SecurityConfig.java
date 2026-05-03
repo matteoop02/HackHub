@@ -28,8 +28,13 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/hackathon/public").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/auth/supported-roles").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/hackathon/public", "/api/hackathon/*").permitAll()
+                .requestMatchers(HttpMethod.POST,
+                    "/api/invites/outside/accept",
+                    "/api/invites/outside/rejectOutsideInvite"
+                ).permitAll()
                 .requestMatchers(
                     "/h2-console/**",
                     "/swagger-ui/**",

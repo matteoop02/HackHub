@@ -36,7 +36,7 @@ public class InviteController {
     @ApiResponse(responseCode = "200", description = "Rifiuto avvenuto con successo")
     @ApiResponse(responseCode = "400", description = "Errore nella richiesta o dati non validi")
     public ResponseEntity<String> rejectOutsideInvite(
-            @RequestBody @Valid RejectOutsideInviteRequest rejectOutsideInviteRequest) {
+            @org.springframework.web.bind.annotation.RequestBody @Valid RejectOutsideInviteRequest rejectOutsideInviteRequest) {
         inviteService.rejectOutsideInvite(rejectOutsideInviteRequest);
         return ResponseEntity.ok("Rifiuto dell'invito riuscito!");
     }
@@ -50,7 +50,7 @@ public class InviteController {
     @ApiResponse(responseCode = "200", description = "Accettazione avvenuta con successo")
     @ApiResponse(responseCode = "400", description = "Errore nella richiesta o invito non valido")
     public ResponseEntity<OutsideInviteAcceptanceResponse> acceptOutsideInvite(
-            @RequestBody @Valid AcceptOutsideInviteRequest request) {
+            @org.springframework.web.bind.annotation.RequestBody @Valid AcceptOutsideInviteRequest request) {
         return ResponseEntity.ok(inviteService.acceptOutsideInvite(request));
     }
 
@@ -76,7 +76,7 @@ public class InviteController {
     @ApiResponse(responseCode = "400", description = "Errore nella richiesta o utente non valido")
     public ResponseEntity<InviteResponse> inviteToTeam(
             Authentication authentication,
-            @RequestBody @Valid InsideInviteRequest insideInviteRequest) {
+            @org.springframework.web.bind.annotation.RequestBody @Valid InsideInviteRequest insideInviteRequest) {
 
         InviteResponse invite = inviteService.inviteUserToTeam(authentication, insideInviteRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(invite);
@@ -104,7 +104,7 @@ public class InviteController {
     @ApiResponse(responseCode = "200", description = "Invito accettato con successo")
     @ApiResponse(responseCode = "400", description = "Errore durante l'accettazione dell'invito")
     public ResponseEntity<InviteResponse> acceptTeamInvite(Authentication authentication,
-            @RequestBody @Valid AcceptInsideInviteRequest request) {
+            @org.springframework.web.bind.annotation.RequestBody @Valid AcceptInsideInviteRequest request) {
         return ResponseEntity.ok(inviteService.acceptTeamInvite(authentication, request));
     }
 
@@ -127,7 +127,7 @@ public class InviteController {
     @ApiResponse(responseCode = "200", description = "Invito rifiutato con successo")
     @ApiResponse(responseCode = "400", description = "Errore durante il rifiuto dell'invito")
     public ResponseEntity<String> rejectTeamInvite(Authentication authentication, 
-            @RequestBody @Valid RejectInsideInviteRequest rejectInsideInviteRequest) {
+            @org.springframework.web.bind.annotation.RequestBody @Valid RejectInsideInviteRequest rejectInsideInviteRequest) {
         inviteService.rejectTeamInvite(authentication, rejectInsideInviteRequest);
         return ResponseEntity.ok("Invito rifiutato con successo!");
     }
@@ -152,7 +152,7 @@ public class InviteController {
     @ApiResponse(responseCode = "200", description = "Invito creato e mail inviata")
     @ApiResponse(responseCode = "400", description = "Errore nella richiesta")
     public ResponseEntity<String> createOutsideInvite(Authentication authentication, 
-            @RequestBody @Valid CreateOutsideInviteRequest request) {
+            @org.springframework.web.bind.annotation.RequestBody @Valid CreateOutsideInviteRequest request) {
         inviteService.createOutsideInvite(authentication, request);
         return ResponseEntity.ok("Invito inviato con successo!");
     }

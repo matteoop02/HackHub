@@ -90,7 +90,7 @@ public class SubmissionController {
     @ApiResponse(responseCode = "200", description = "Sottomissione aggiornata con successo")
     @ApiResponse(responseCode = "400", description = "Errore nella richiesta")
     public ResponseEntity<String> updateSubmission(
-            @Valid @RequestBody UpdateTeamSubmissionRequest updateTeamSubmissionRequest) {
+            @Valid @org.springframework.web.bind.annotation.RequestBody UpdateTeamSubmissionRequest updateTeamSubmissionRequest) {
         submissionService.updateSubmission(updateTeamSubmissionRequest);
         return ResponseEntity.ok("Sottomissione aggiornata con successo");
     }
@@ -116,7 +116,7 @@ public class SubmissionController {
     @ApiResponse(responseCode = "200", description = "Sottomissione valutata con successo")
     @ApiResponse(responseCode = "400", description = "Errore nella valutazione")
     public ResponseEntity<String> evaluateSubmission(Authentication authentication, 
-            @Valid @RequestBody EvaluateSubmissionRequest request) {
+            @Valid @org.springframework.web.bind.annotation.RequestBody EvaluateSubmissionRequest request) {
         submissionService.evaluateSubmission(authentication, request);
         return ResponseEntity.ok("Sottomissione valutata con successo");
     }
@@ -142,7 +142,7 @@ public class SubmissionController {
     @ApiResponse(responseCode = "200", description = "Valutazione modificata con successo")
     @ApiResponse(responseCode = "400", description = "Errore nella modifica della valutazione")
     public ResponseEntity<String> updateEvaluationSubmission(Authentication authentication,
-            @Valid @RequestBody EvaluateSubmissionRequest request) {
+            @Valid @org.springframework.web.bind.annotation.RequestBody EvaluateSubmissionRequest request) {
         submissionService.evaluateSubmission(authentication, request);
         return ResponseEntity.ok("Valutazione modificata con successo");
     }
