@@ -187,8 +187,10 @@ public class HackathonManagementService {
     }
 
     @Scheduled(cron = "0 * * * * *")
-    public void terminateExpiredHackathons() {
-        moveExpiredHackathonsToEvaluation();
+    public void updateHackathonStatesByDate() {
+        LocalDateTime now = LocalDateTime.now();
+        startHackathonsReadyToRun(now);
+        moveExpiredHackathonsToEvaluation(now);
     }
 
     private Hackathon getManagedHackathon(Authentication authentication, Long id) {
@@ -214,12 +216,24 @@ public class HackathonManagementService {
         return user;
     }
 
-    private void moveExpiredHackathonsToEvaluation() {
+    private void startHackathonsReadyToRun(LocalDateTime now) {
+        List<Hackathon> hackathonsToStart = hackathonRepository.findAll().stream()
+                .filter(hackathon -> hackathon.getState() == HackathonState.IN_ISCRIZIONE)
+                .filter(hackathon -> hackathon.getStartDate() != null)
+                .filter(hackathon -> !hackathon.getStartDate().isAfter(now))
+                .filter(hackathon -> hackathon.getEndDate() == null || hackathon.getEndDate().isAfter(now))
+                .toList();
+
+        hackathonsToStart.forEach(hackathon -> hackathon.setState(HackathonState.IN_CORSO));
+        hackathonRepository.saveAll(hackathonsToStart);
+    }
+
+    private void moveExpiredHackathonsToEvaluation(LocalDateTime now) {
         List<Hackathon> hackathonsToEvaluate = hackathonRepository.findAll().stream()
                 .filter(hackathon -> hackathon.getState() != HackathonState.CONCLUSO)
                 .filter(hackathon -> hackathon.getState() != HackathonState.IN_VALUTAZIONE)
                 .filter(hackathon -> hackathon.getEndDate() != null)
-                .filter(hackathon -> !hackathon.getEndDate().isAfter(LocalDateTime.now()))
+                .filter(hackathon -> !hackathon.getEndDate().isAfter(now))
                 .toList();
 
         hackathonsToEvaluate.forEach(hackathon -> hackathon.setState(HackathonState.IN_VALUTAZIONE));

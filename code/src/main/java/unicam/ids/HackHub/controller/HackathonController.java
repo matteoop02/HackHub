@@ -1,6 +1,7 @@
 package unicam.ids.HackHub.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -75,6 +76,7 @@ public class HackathonController {
     }
 
     @PostMapping("/{id}/start")
+    @Hidden
     @Operation(summary = "Avvia Hackathon", description = "Permette all'organizzatore di avviare l'hackathon (passando allo stato IN_CORSO)")
     @ApiResponse(responseCode = "200", description = "Hackathon avviato")
     @ApiResponse(responseCode = "400", description = "Errore nell'avvio")
@@ -84,6 +86,7 @@ public class HackathonController {
     }
 
     @PostMapping("/{id}/closeSubscriptions")
+    @Hidden
     @Operation(summary = "Termina iscrizioni Hackathon", description = "Permette all'organizzatore di terminare le iscrizioni (passando allo stato IN_CORSO)")
     @ApiResponse(responseCode = "200", description = "Iscrizioni terminate")
     @ApiResponse(responseCode = "400", description = "Errore nella chiusura")
