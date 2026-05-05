@@ -1,6 +1,6 @@
 # HackHub
 
-> Backend Spring Boot per la creazione e la gestione di hackathon, sviluppato come progetto accademico con attenzione a modellazione, documentazione e API REST.
+Backend Spring Boot per la creazione e la gestione di hackathon, sviluppato come progetto per il corso di Ingegneria del Software dell'Universita di Camerino (Unicam), anno accademico 2025/2026
 
 ![Java 17](https://img.shields.io/badge/Java-17-007396?logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.3-6DB33F?logo=springboot&logoColor=white)
