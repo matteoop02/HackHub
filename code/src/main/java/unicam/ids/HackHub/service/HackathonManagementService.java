@@ -241,6 +241,7 @@ public class HackathonManagementService {
     }
 
     private HackathonResponse mapToResponse(Hackathon hackathon) {
+        User organizer = hackathonRoleAssignmentService.getOrganizer(hackathon);
         return HackathonResponse.builder()
                 .id(hackathon.getId())
                 .name(hackathon.getName())
@@ -253,10 +254,10 @@ public class HackathonManagementService {
                 .maxTeamSize(hackathon.getMaxTeamSize())
                 .isPublic(Boolean.TRUE.equals(hackathon.getIsPublic()))
                 .state(hackathon.getState())
-                .organizerName(hackathonRoleAssignmentService.getOrganizer(hackathon) != null
-                        ? hackathonRoleAssignmentService.getOrganizer(hackathon).getName() + " "
-                        + hackathonRoleAssignmentService.getOrganizer(hackathon).getSurname()
-                        : "N/A")
+                .organizerName(organizer != null ? organizer.getName() + " " + organizer.getSurname() : "N/A")
+                .mentors(hackathonRoleAssignmentService.getMentors(hackathon))
+                .judge(hackathonRoleAssignmentService.getJudge(hackathon))
+                .teams(hackathon.getTeams())
                 .winningTeamId(hackathon.getTeamWinner() != null ? hackathon.getTeamWinner().getId() : null)
                 .winningTeamName(hackathon.getTeamWinner() != null ? hackathon.getTeamWinner().getName() : null)
                 .build();

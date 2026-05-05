@@ -30,23 +30,6 @@ public class CalendarController {
 
     @PostMapping("/slots")
     @Operation(summary = "Definisci slot di disponibilita'", description = "Permette a un mentore di dichiarare gli slot disponibili per call di supporto.")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            required = true,
-            content = @Content(
-                    mediaType = "application/json",
-                    examples = @ExampleObject(
-                            name = "Slot Mentore",
-                            value = """
-                                    {
-                                      "hackathonId": 1,
-                                      "startTime": "2026-05-10T15:00:00",
-                                      "endTime": "2026-05-10T15:30:00",
-                                      "notes": "Disponibile per supporto su backend e architettura."
-                                    }
-                                    """
-                    )
-            )
-    )
     @ApiResponse(responseCode = "201", description = "Slot creato con successo")
     @ApiResponse(responseCode = "400", description = "Richiesta non valida")
     public ResponseEntity<MentorAvailabilitySlotResponse> createAvailabilitySlot(
@@ -57,37 +40,6 @@ public class CalendarController {
 
     @PostMapping("/support-calls")
     @Operation(summary = "Proponi una call di supporto", description = "Permette a un mentore di proporre una call di supporto a un team.")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            required = true,
-            content = @Content(
-                    mediaType = "application/json",
-                    examples = {
-                            @ExampleObject(
-                                    name = "Con Slot",
-                                    value = """
-                                            {
-                                              "teamId": 1,
-                                              "slotId": 1,
-                                              "subject": "Supporto sull'architettura del progetto",
-                                              "message": "Possiamo fare una call per rivedere backend e piano di consegna?"
-                                            }
-                                            """
-                            ),
-                            @ExampleObject(
-                                    name = "Con Orario Proposto",
-                                    value = """
-                                            {
-                                              "teamId": 1,
-                                              "proposedStartTime": "2026-05-10T17:00:00",
-                                              "proposedEndTime": "2026-05-10T17:30:00",
-                                              "subject": "Debug session",
-                                              "message": "Vi propongo una call per analizzare insieme il problema sul deploy."
-                                            }
-                                            """
-                            )
-                    }
-            )
-    )
     @ApiResponse(responseCode = "201", description = "Proposta creata con successo")
     @ApiResponse(responseCode = "400", description = "Richiesta non valida")
     public ResponseEntity<SupportCallProposalResponse> proposeSupportCall(
@@ -99,22 +51,7 @@ public class CalendarController {
     @PostMapping("/slots/{slotId}/book")
     @Operation(
             summary = "Prenota slot call con mentore",
-            description = "Permette al leader del team di prenotare uno slot per una call con il mentore.",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    content = @Content(
-                            mediaType = "application/json",
-                            examples = @ExampleObject(
-                                    name = "Prenotazione Slot",
-                                    value = """
-                                            {
-                                              "subject": "Supporto sulla demo finale",
-                                              "message": "Vorremmo usare questo slot per rivedere demo e pitch."
-                                            }
-                                            """
-                            )
-                    )
-            )
+            description = "Permette al leader del team di prenotare uno slot per una call con il mentore."
     )
     @ApiResponse(responseCode = "201", description = "Slot prenotato con successo")
     @ApiResponse(responseCode = "400", description = "Errore nella prenotazione dello slot")

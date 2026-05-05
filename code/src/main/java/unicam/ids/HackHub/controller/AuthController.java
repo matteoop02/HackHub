@@ -29,42 +29,7 @@ public class AuthController {
     @PostMapping("/register")
     @Operation(
             summary = "Registrazione",
-            description = "Registra un nuovo utente sulla piattaforma. Il token JWT restituito puo' essere usato subito in Swagger tramite il pulsante Authorize.",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    content = @Content(
-                            mediaType = "application/json",
-                            examples = {
-                                    @ExampleObject(
-                                            name = "Organizzatore",
-                                            value = """
-                                                    {
-                                                      "name": "Mario",
-                                                      "surname": "Rossi",
-                                                      "username": "mario.rossi",
-                                                      "email": "mario.rossi@example.com",
-                                                      "password": "Password123!",
-                                                      "dateOfBirth": "1999-05-14",
-                                                      "roleName": "ORGANIZER"
-                                                    }
-                                                    """
-                                    ),
-                                    @ExampleObject(
-                                            name = "Utente Default",
-                                            value = """
-                                                    {
-                                                      "name": "Luca",
-                                                      "surname": "Bianchi",
-                                                      "username": "luca.bianchi",
-                                                      "email": "luca.bianchi@example.com",
-                                                      "password": "Password123!",
-                                                      "dateOfBirth": "2000-03-21"
-                                                    }
-                                                    """
-                                    )
-                            }
-                    )
-            )
+            description = "Registra un nuovo utente sulla piattaforma. Il token JWT restituito puo' essere usato subito in Swagger tramite il pulsante Authorize."
     )
     @ApiResponse(responseCode = "201", description = "Utente registrato con successo")
     @ApiResponse(responseCode = "400", description = "Richiesta non valida")
@@ -75,22 +40,7 @@ public class AuthController {
     @PostMapping("/login")
     @Operation(
             summary = "Login",
-            description = "Autentica un utente registrato e restituisce un token JWT. Copia il campo token e usalo nel pulsante Authorize di Swagger.",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    content = @Content(
-                            mediaType = "application/json",
-                            examples = @ExampleObject(
-                                    name = "Login Base",
-                                    value = """
-                                            {
-                                              "username": "mario.rossi",
-                                              "password": "Password123!"
-                                            }
-                                            """
-                            )
-                    )
-            )
+            description = "Autentica un utente registrato e restituisce un token JWT. Copia il campo token e usalo nel pulsante Authorize di Swagger."
     )
     @ApiResponse(responseCode = "200", description = "Login eseguito con successo")
     @ApiResponse(responseCode = "403", description = "Credenziali non valide")

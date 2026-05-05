@@ -16,8 +16,8 @@ public class RegistrationStateBehavior implements HackathonStateBehavior {
 
     @Override
     public void closeSubscriptions(Hackathon hackathon) {
-        if (LocalDateTime.now().isBefore(hackathon.getStartDate())) {
-            throw new IllegalStateException("Non puoi terminare le iscrizioni prima della data di inizio dell'hackathon (" + hackathon.getStartDate() + ")");
+        if (LocalDateTime.now().isBefore(hackathon.getSubscriptionDeadline())) {
+            throw new IllegalStateException("Non puoi terminare le iscrizioni prima della data di fine iscrizioni (" + hackathon.getSubscriptionDeadline() + ")");
         }
         hackathon.setState(HackathonState.IN_CORSO);
     }

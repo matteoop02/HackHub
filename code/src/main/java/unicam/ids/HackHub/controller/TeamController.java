@@ -26,22 +26,6 @@ public class TeamController {
 
     @PostMapping("/utente/create")
     @Operation(summary = "Creazione nuovo team", description = "Permette la registrazione di un nuovo team da parte di un Utente")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            required = true,
-            content = @Content(
-                    mediaType = "application/json",
-                    examples = @ExampleObject(
-                            name = "Creazione Team",
-                            value = """
-                                    {
-                                      "name": "Code Titans",
-                                      "isPublic": true,
-                                      "hackathonId": 1
-                                    }
-                                    """
-                    )
-            )
-    )
     @ApiResponse(responseCode = "200", description = "Team registrato con successo")
     @ApiResponse(responseCode = "400", description = "Team non creato,errore")
     public ResponseEntity<TeamResponse> createTeam(Authentication authentication,
@@ -87,20 +71,6 @@ public class TeamController {
 
     @PostMapping("/{teamId}/violation/report")
     @Operation(summary = "Segnala Violazione Team", description = "Permette a un mentore di segnalare una violazione da parte del team all'organizzatore.")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            required = true,
-            content = @Content(
-                    mediaType = "application/json",
-                    examples = @ExampleObject(
-                            name = "Segnalazione Violazione",
-                            value = """
-                                    {
-                                      "description": "Il team ha condiviso materiale non consentito con un altro gruppo durante la fase competitiva."
-                                    }
-                                    """
-                    )
-            )
-    )
     @ApiResponse(responseCode = "200", description = "Segnalazione inviata con successo")
     @ApiResponse(responseCode = "400", description = "Errore nella segnalazione")
     public ResponseEntity<String> reportViolation(Authentication authentication, 

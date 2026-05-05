@@ -41,23 +41,7 @@ public class SubmissionController {
     @PostMapping("/team/send")
     @Operation(
             summary = "Invia sottomissione team",
-            description = "Permette al leader del team di inviare ufficialmente la sottomissione prima della scadenza.",
-            requestBody = @RequestBody(
-                    required = true,
-                    content = @Content(
-                            mediaType = "application/json",
-                            examples = @ExampleObject(
-                                    name = "Invio Submission",
-                                    value = """
-                                            {
-                                              "teamId": 1,
-                                              "title": "Smart Mobility Platform",
-                                              "content": "Versione finale del progetto con demo, API REST e dashboard."
-                                            }
-                                            """
-                            )
-                    )
-            )
+            description = "Permette al leader del team di inviare ufficialmente la sottomissione prima della scadenza."
     )
     @ApiResponse(responseCode = "200", description = "Sottomissione inviata con successo")
     @ApiResponse(responseCode = "400", description = "Errore nell'invio della sottomissione")
@@ -71,22 +55,6 @@ public class SubmissionController {
      */
     @PostMapping("/team/update")
     @Operation(summary = "Aggiorna sottomissione team", description = "Permette di aggiornare una sottomissione già esistente per il team.")
-    @RequestBody(
-            required = true,
-            content = @Content(
-                    mediaType = "application/json",
-                    examples = @ExampleObject(
-                            name = "Aggiornamento Submission",
-                            value = """
-                                    {
-                                      "submissionId": 1,
-                                      "title": "Smart Mobility Platform",
-                                      "content": "Abbiamo aggiornato il prototipo con dashboard, API REST e deployment su cloud."
-                                    }
-                                    """
-                    )
-            )
-    )
     @ApiResponse(responseCode = "200", description = "Sottomissione aggiornata con successo")
     @ApiResponse(responseCode = "400", description = "Errore nella richiesta")
     public ResponseEntity<String> updateSubmission(
@@ -97,22 +65,6 @@ public class SubmissionController {
 
     @PostMapping("/staff/evaluate")
     @Operation(summary = "Valuta sottomissione (Giudice)", description = "Permette al giudice dell'hackathon di valutare una sottomissione assegnando score e commento.")
-    @RequestBody(
-            required = true,
-            content = @Content(
-                    mediaType = "application/json",
-                    examples = @ExampleObject(
-                            name = "Valutazione Submission",
-                            value = """
-                                    {
-                                      "submissionId": 1,
-                                      "score": 8.5,
-                                      "comment": "Progetto solido, buona presentazione e architettura chiara."
-                                    }
-                                    """
-                    )
-            )
-    )
     @ApiResponse(responseCode = "200", description = "Sottomissione valutata con successo")
     @ApiResponse(responseCode = "400", description = "Errore nella valutazione")
     public ResponseEntity<String> evaluateSubmission(Authentication authentication, 
@@ -123,22 +75,6 @@ public class SubmissionController {
 
     @PutMapping("/staff/evaluate")
     @Operation(summary = "Modifica valutazione sottomissione (Giudice)", description = "Permette al giudice di modificare la valutazione di una sottomissione entro il periodo di valutazione dell'hackathon.")
-    @RequestBody(
-            required = true,
-            content = @Content(
-                    mediaType = "application/json",
-                    examples = @ExampleObject(
-                            name = "Modifica Valutazione Submission",
-                            value = """
-                                    {
-                                      "submissionId": 1,
-                                      "score": 9.0,
-                                      "comment": "Valutazione aggiornata dopo revisione finale del progetto."
-                                    }
-                                    """
-                    )
-            )
-    )
     @ApiResponse(responseCode = "200", description = "Valutazione modificata con successo")
     @ApiResponse(responseCode = "400", description = "Errore nella modifica della valutazione")
     public ResponseEntity<String> updateEvaluationSubmission(Authentication authentication,

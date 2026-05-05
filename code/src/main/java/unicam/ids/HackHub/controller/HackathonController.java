@@ -54,19 +54,7 @@ public class HackathonController {
     }
 
     @PostMapping("/organizzatore/create")
-    @Operation(summary = "Creazione nuovo hackathon", description = "Permette la registrazione di un nuovo hackathon", requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Dati dell'hackathon da registrare", required = true, content = @Content(mediaType = "application/json", examples = @ExampleObject(name = "Esempio registrazione", value = """
-                {
-                  "name": "Hackathon Innovazione 2026",
-                  "place": "Camerino",
-                  "regulation": "Testo...",
-                  "subscriptionDeadline": "2026-04-01T23:59:59",
-                  "startDate": "2026-05-01T23:59:59",
-                  "endDate": "2026-05-03T23:59:59",
-                  "reward": 5000.0,
-                  "maxTeamSize": 5,
-                  "isPublic": true
-                }
-            """))))
+    @Operation(summary = "Creazione nuovo hackathon", description = "Permette la registrazione di un nuovo hackathon")
     @ApiResponse(responseCode = "200", description = "Hackathon registrato con successo")
     @ApiResponse(responseCode = "400", description = "Richiesta non valida o dati mancanti")
     public ResponseEntity<String> createHackathon(Authentication authentication,
@@ -97,20 +85,6 @@ public class HackathonController {
 
     @PostMapping("/{id}/winner")
     @Operation(summary = "Proclama team vincitore", description = "Permette all'organizzatore di proclamare il team vincitore.")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            required = true,
-            content = @Content(
-                    mediaType = "application/json",
-                    examples = @ExampleObject(
-                            name = "Team Vincitore",
-                            value = """
-                                    {
-                                      "teamId": 1
-                                    }
-                                    """
-                    )
-            )
-    )
     @ApiResponse(responseCode = "200", description = "Team vincitore proclamato con successo")
     @ApiResponse(responseCode = "400", description = "Errore nella proclamazione")
     public ResponseEntity<HackathonResponse> declareWinningTeam(Authentication authentication,
@@ -137,20 +111,6 @@ public class HackathonController {
 
     @PostMapping("/{id}/judge")
     @Operation(summary = "Aggiungi giudice all'hackathon", description = "Permette all'organizzatore di assegnare un giudice all'hackathon.")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            required = true,
-            content = @Content(
-                    mediaType = "application/json",
-                    examples = @ExampleObject(
-                            name = "Assegna Giudice",
-                            value = """
-                                    {
-                                      "judgeId": 7
-                                    }
-                                    """
-                    )
-            )
-    )
     public ResponseEntity<String> assignJudge(Authentication authentication, @PathVariable Long id,
             @RequestBody @Valid AssignJudgeRequest request) {
         hackathonService.assignJudge(authentication, id, request);
@@ -167,20 +127,6 @@ public class HackathonController {
 
     @PostMapping("/{id}/mentors")
     @Operation(summary = "Aggiungi mentori all'hackathon", description = "Permette all'organizzatore di assegnare uno o piu' mentori all'hackathon.")
-    @io.swagger.v3.oas.annotations.parameters.RequestBody(
-            required = true,
-            content = @Content(
-                    mediaType = "application/json",
-                    examples = @ExampleObject(
-                            name = "Assegna Mentori",
-                            value = """
-                                    {
-                                      "mentorIds": [8, 9]
-                                    }
-                                    """
-                    )
-            )
-    )
     public ResponseEntity<String> assignMentors(Authentication authentication, @PathVariable Long id,
             @RequestBody @Valid AssignMentorsRequest request) {
         hackathonService.assignMentors(authentication, id, request);

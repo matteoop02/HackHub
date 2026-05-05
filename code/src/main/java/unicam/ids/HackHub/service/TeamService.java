@@ -56,12 +56,6 @@ public class TeamService {
             throw new BusinessLogicException("L'utente appartiene gia' a un team");
         }
 
-        Hackathon hackathon = null;
-        if (request.hackathonId() != null) {
-            hackathon = hackathonRepository.findById(request.hackathonId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Hackathon non trovato"));
-        }
-
         Optional<Team> teamOptional = teamRepository.findByName(request.name());
         if(teamOptional.isPresent()) {
             throw new IllegalArgumentException("Nome team già esistente");
@@ -70,16 +64,11 @@ public class TeamService {
         Team team = Team.builder()
                 .name(request.name())
                 .isPublic(request.isPublic())
-                .hackathon(hackathon)
                 .build();
 
         Team savedTeam = teamRepository.save(team);
         teamMembershipService.addMembership(creator, savedTeam, TeamRole.LEADER);
 
-        if (hackathon != null) {
-            hackathon.getTeams().add(savedTeam);
-            hackathonRepository.save(hackathon);
-        }
 
         return mapToResponse(savedTeam);
     }
