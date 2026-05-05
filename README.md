@@ -208,5 +208,3 @@ Di seguito sono riportate le chiamate esposte dal backend, organizzate per area 
 - Alcune operazioni richiedono prerequisiti di stato, ad esempio hackathon in iscrizione, in corso o in valutazione
 - La fase di valutazione dipende anche dalle date configurate per l'hackathon
 - Il database usato in sviluppo è H2 in-memory, quindi i dati vengono persi allo spegnimento dell'applicazione
-- Se `bootRun` trova conflitti locali, l'avvio tramite jar è spesso l'alternativa più stabile
-
