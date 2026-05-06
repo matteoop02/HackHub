@@ -53,7 +53,8 @@ public class HackathonRoleAssignmentService {
     }
 
     public Set<User> getMentors(Hackathon hackathon) {
-        List<User> assignedMentors = hackathonRoleAssignmentRepository.findByHackathonAndRole(hackathon, HackathonRole.MENTOR)
+        List<User> assignedMentors = hackathonRoleAssignmentRepository
+                .findByHackathonAndRole(hackathon, HackathonRole.MENTOR)
                 .stream()
                 .map(HackathonRoleAssignment::getUser)
                 .toList();
@@ -102,12 +103,15 @@ public class HackathonRoleAssignmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Hackathon non trovato"));
         switch (role) {
             case JUDGE -> {
-                if (managedHackathon.getJudge() != null && Objects.equals(managedHackathon.getJudge().getId(), user.getId())) {
+                if (managedHackathon.getJudge() != null
+                        && Objects.equals(managedHackathon.getJudge().getId(), user.getId())) {
                     managedHackathon.setJudge(null);
                 }
             }
-            case MENTOR -> managedHackathon.getMentors().removeIf(mentor -> Objects.equals(mentor.getId(), user.getId()));
-            case ORGANIZER -> throw new BusinessLogicException("L'organizzatore non puo' essere rimosso con questa operazione");
+            case MENTOR ->
+                managedHackathon.getMentors().removeIf(mentor -> Objects.equals(mentor.getId(), user.getId()));
+            case ORGANIZER ->
+                throw new BusinessLogicException("L'organizzatore non puo' essere rimosso con questa operazione");
         }
         hackathonRepository.save(managedHackathon);
         syncLegacyState(hackathon);
@@ -118,7 +122,8 @@ public class HackathonRoleAssignmentService {
         Hackathon managedHackathon = hackathonRepository.findById(hackathon.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Hackathon non trovato"));
 
-        User organizer = hackathonRoleAssignmentRepository.findByHackathonAndRole(managedHackathon, HackathonRole.ORGANIZER)
+        User organizer = hackathonRoleAssignmentRepository
+                .findByHackathonAndRole(managedHackathon, HackathonRole.ORGANIZER)
                 .stream()
                 .map(HackathonRoleAssignment::getUser)
                 .findFirst()
@@ -130,7 +135,8 @@ public class HackathonRoleAssignmentService {
                 .findFirst()
                 .orElse(managedHackathon.getJudge());
 
-        Set<User> mentors = hackathonRoleAssignmentRepository.findByHackathonAndRole(managedHackathon, HackathonRole.MENTOR)
+        Set<User> mentors = hackathonRoleAssignmentRepository
+                .findByHackathonAndRole(managedHackathon, HackathonRole.MENTOR)
                 .stream()
                 .map(HackathonRoleAssignment::getUser)
                 .collect(Collectors.toSet());
@@ -144,9 +150,11 @@ public class HackathonRoleAssignmentService {
 
     private boolean hasLegacyRole(User user, Hackathon hackathon, HackathonRole role) {
         return switch (role) {
-            case ORGANIZER -> hackathon.getOrganizer() != null && Objects.equals(hackathon.getOrganizer().getId(), user.getId());
+            case ORGANIZER ->
+                hackathon.getOrganizer() != null && Objects.equals(hackathon.getOrganizer().getId(), user.getId());
             case JUDGE -> hackathon.getJudge() != null && Objects.equals(hackathon.getJudge().getId(), user.getId());
-            case MENTOR -> hackathon.getMentors().stream().anyMatch(mentor -> Objects.equals(mentor.getId(), user.getId()));
+            case MENTOR ->
+                hackathon.getMentors().stream().anyMatch(mentor -> Objects.equals(mentor.getId(), user.getId()));
         };
     }
 }
